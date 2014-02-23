@@ -453,9 +453,11 @@ main (int argc, char *argv[])
 
         manager = NULL;
 
+#if !GLIB_CHECK_VERSION(2, 32, 0)
         if (!g_thread_supported ()) {
                 g_thread_init (NULL);
         }
+#endif
 
         mate_settings_profile_start (NULL);
 
@@ -466,7 +468,9 @@ main (int argc, char *argv[])
 
         parse_args (&argc, &argv);
 
+#if !GLIB_CHECK_VERSION(2, 34, 0)
         g_type_init ();
+#endif
 
         mate_settings_profile_start ("opening gtk display");
         if (! gtk_init_check (NULL, NULL)) {
