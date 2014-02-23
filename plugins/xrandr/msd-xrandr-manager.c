@@ -1677,7 +1677,11 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
         MsdXrandrManager *manager = MSD_XRANDR_MANAGER (data);
         struct MsdXrandrManagerPrivate *priv = manager->priv;
         MateOutputInfo *output;
+#if GTK_CHECK_VERSION (3, 0, 0)
+        GdkRGBA color;
+#else
         GdkColor color;
+#endif
         cairo_t *cr;
         GtkAllocation allocation;
 
@@ -1690,7 +1694,11 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
 
         /* Draw a black rectangular border, filled with the color that corresponds to this output */
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        mate_rr_labeler_get_rgba_for_output (priv->labeler, output, &color);
+#else
         mate_rr_labeler_get_color_for_output (priv->labeler, output, &color);
+#endif
 
         cr = gdk_cairo_create (gtk_widget_get_window (widget));
 
@@ -1704,7 +1712,11 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
                          allocation.height - OUTPUT_TITLE_ITEM_BORDER);
         cairo_stroke (cr);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_cairo_set_source_rgba (cr, &color);
+#else
         gdk_cairo_set_source_color (cr, &color);
+#endif
         cairo_rectangle (cr,
                          allocation.x + OUTPUT_TITLE_ITEM_BORDER,
                          allocation.y + OUTPUT_TITLE_ITEM_BORDER,
@@ -1784,7 +1796,11 @@ make_menu_item_for_output_title (MsdXrandrManager *manager, MateOutputInfo *outp
         GtkWidget *item;
         GtkWidget *label;
         char *str;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	GdkRGBA black = { 0.0, 0.0, 0.0, 1.0 };
+#else
 	GdkColor black = { 0, 0, 0, 0 };
+#endif
 
         item = gtk_menu_item_new ();
 
@@ -1800,7 +1816,11 @@ make_menu_item_for_output_title (MsdXrandrManager *manager, MateOutputInfo *outp
 	 * theme's colors, since the label is always shown against a light
 	 * pastel background.  See bgo#556050
 	 */
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_color (label, gtk_widget_get_state_flags (label), &black);
+#else
 	gtk_widget_modify_fg (label, gtk_widget_get_state (label), &black);
+#endif
 
         /* Add padding around the label to fit the box that we'll draw for color-coding */
         gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);

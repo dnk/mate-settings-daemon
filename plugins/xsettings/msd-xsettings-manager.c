@@ -625,7 +625,11 @@ setup_xsettings_managers (MateXSettingsManager *manager)
         gboolean    terminated;
 
         display = gdk_display_get_default ();
+#if GTK_CHECK_VERSION(3, 10, 0)
+        n_screens = 1;
+#else
         n_screens = gdk_display_get_n_screens (display);
+#endif
 
         res = xsettings_manager_check_running (gdk_x11_display_get_xdisplay (display),
                                                gdk_screen_get_number (gdk_screen_get_default ()));

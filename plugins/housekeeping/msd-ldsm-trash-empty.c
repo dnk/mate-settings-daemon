@@ -246,9 +246,15 @@ trash_empty_start ()
         gtk_window_set_title (GTK_WINDOW (trash_empty_dialog),
                               _("Emptying the trash"));
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+        vbox1 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+        vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+        hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+#else
         vbox1 = gtk_vbox_new (FALSE, 12);
         vbox2 = gtk_vbox_new (FALSE, 0);
         hbox = gtk_hbox_new (FALSE, 0);
+#endif
 
         label1 = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (label1), TRUE);

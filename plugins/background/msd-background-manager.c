@@ -225,7 +225,11 @@ draw_background (MsdBackgroundManager *manager,
 	mate_settings_profile_start (NULL);
 
 	GdkDisplay *display   = gdk_display_get_default ();
+#if GTK_CHECK_VERSION(3, 10, 0)
+	int         n_screens = 1;
+#else
 	int         n_screens = gdk_display_get_n_screens (display);
+#endif
 	int         scr;
 
 	p->draw_in_progress = TRUE;
@@ -286,7 +290,11 @@ static void
 disconnect_screen_signals (MsdBackgroundManager *manager)
 {
 	GdkDisplay *display   = gdk_display_get_default();
+#if GTK_CHECK_VERSION(3, 10, 0)
+	int         n_screens = 1;
+#else
 	int         n_screens = gdk_display_get_n_screens (display);
+#endif
 	int         i;
 
 	for (i = 0; i < n_screens; i++)
@@ -301,7 +309,11 @@ static void
 connect_screen_signals (MsdBackgroundManager *manager)
 {
 	GdkDisplay *display   = gdk_display_get_default();
+#if GTK_CHECK_VERSION(3, 0, 0)
+	int         n_screens = 1;
+#else
 	int         n_screens = gdk_display_get_n_screens (display);
+#endif
 	int         i;
 
 	for (i = 0; i < n_screens; i++)

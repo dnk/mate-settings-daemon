@@ -246,12 +246,20 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         
         /* Now set up the dialog's GtkBox's' */
         gtk_box_set_spacing (GTK_BOX (main_vbox), 14);
-	
+
+#if GTK_CHECK_VERSION(3, 0, 0)
+        hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+#else
         hbox = gtk_hbox_new (FALSE, 12);
+#endif
         gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-	
+
+#if GTK_CHECK_VERSION(3, 0, 0)
+        text_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+#else
         text_vbox = gtk_vbox_new (FALSE, 12);
-        
+#endif
+
         gtk_box_pack_start (GTK_BOX (text_vbox), dialog->priv->primary_label, FALSE, FALSE, 0);
         gtk_box_pack_start (GTK_BOX (text_vbox), dialog->priv->secondary_label, TRUE, TRUE, 0);
         gtk_box_pack_start (GTK_BOX (text_vbox), dialog->priv->ignore_check_button, FALSE, FALSE, 0);

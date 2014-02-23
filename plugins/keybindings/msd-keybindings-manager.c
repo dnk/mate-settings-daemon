@@ -82,7 +82,11 @@ get_screens_list (void)
         GSList     *list = NULL;
         int         i;
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+        n_screens = 1;
+#else
         n_screens = gdk_display_get_n_screens (display);
+#endif
 
         if (n_screens == 1) {
                 list = g_slist_append (list, gdk_screen_get_default ());
@@ -558,7 +562,11 @@ msd_keybindings_manager_start (MsdKeybindingsManager *manager,
         mate_settings_profile_start (NULL);
 
         dpy = gdk_display_get_default ();
+#if GTK_CHECK_VERSION(3, 10, 0)
+        screen_num = 1;
+#else
         screen_num = gdk_display_get_n_screens (dpy);
+#endif
 
         for (i = 0; i < screen_num; i++) {
                 screen = gdk_display_get_screen (dpy, i);

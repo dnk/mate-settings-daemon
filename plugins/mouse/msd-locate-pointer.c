@@ -487,7 +487,11 @@ set_locate_pointer (void)
   unsigned j;
 
   display = gdk_display_get_default ();
+#if GTK_CHECK_VERSION(3, 10, 0)
+  n_screens = 1;
+#else
   n_screens = gdk_display_get_n_screens (display);
+#endif
 
   for (j = 0 ; j < G_N_ELEMENTS (keyvals) ; j++)
     {
