@@ -340,11 +340,6 @@ msd_smartcard_manager_init (MsdSmartcardManager *manager)
                                        g_str_equal,
                                        (GDestroyNotify) g_free,
                                        (GDestroyNotify) g_object_unref);
-
-        if (!g_thread_supported ()) {
-                g_thread_init (NULL);
-        }
-
 }
 
 static void
@@ -1261,9 +1256,9 @@ msd_smartcard_manager_create_worker (MsdSmartcardManager  *manager,
         worker = msd_smartcard_manager_worker_new (write_fd);
         worker->module = manager->priv->module;
 
-        *worker_thread = g_thread_create ((GThreadFunc)
+        *worker_thread = g_thread_new ("MsdSmartcardManagerWorker", (GThreadFunc)
                                           msd_smartcard_manager_worker_run,
-                                          worker, FALSE, NULL);
+                                          worker);
 
         if (*worker_thread == NULL) {
                 msd_smartcard_manager_worker_free (worker);
@@ -1334,8 +1329,6 @@ main (int   argc,
 
         g_log_set_always_fatal (G_LOG_LEVEL_ERROR
                                 | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING);
-
-        g_type_init ();
 
         g_message ("creating instance of 'smartcard manager' object...");
         manager = msd_smartcard_manager_new (NULL);

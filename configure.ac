@@ -1,8 +1,8 @@
 AC_PREREQ([2.60])
 
 m4_define([msd_api_version_major],[1])
-m4_define([msd_api_version_minor],[7])
-m4_define([msd_api_version_micro],[90])
+m4_define([msd_api_version_minor],[9])
+m4_define([msd_api_version_micro],[0])
 m4_define([msd_api_version],
 	[msd_api_version_major.msd_api_version_minor.msd_api_version_micro])
 
@@ -50,9 +50,9 @@ dnl - Dependencies
 dnl ---------------------------------------------------------------------------
 
 DBUS_GLIB_REQUIRED_VERSION=0.74
-GLIB_REQUIRED_VERSION=2.17.3
+GLIB_REQUIRED_VERSION=2.36.0
 GIO_REQUIRED_VERSION=2.26.0
-MATE_DESKTOP_REQUIRED_VERSION=1.7.3
+MATE_DESKTOP_REQUIRED_VERSION=1.9.1
 LIBMATEKBD_REQUIRED_VERSION=1.7.0
 LIBNOTIFY_REQUIRED_VERSION=0.7.0
 
