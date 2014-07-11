@@ -175,10 +175,10 @@ _load_file (MateSettingsManager *manager,
                                   DEFAULT_SETTINGS_PREFIX,
                                   mate_settings_plugin_info_get_location (info));
         
-	/* Ignore unknown schemas or else we'll assert */
-	GSettingsSchemaSource *default_source = g_settings_schema_source_get_default ();
-	GSettingsSchema *schema = g_settings_schema_source_lookup(default_source, schema_name, TRUE);
-	if (schema != NULL) {
+        /* Ignore unknown schemas or else we'll assert */
+        GSettingsSchemaSource *default_source = g_settings_schema_source_get_default ();
+        GSettingsSchema *schema = g_settings_schema_source_lookup(default_source, schema_name, TRUE);
+        if (schema != NULL) {
 	       manager->priv->plugins = g_slist_prepend (manager->priv->plugins,
 		                                         g_object_ref (info));
 
