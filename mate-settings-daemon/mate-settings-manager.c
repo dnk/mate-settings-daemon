@@ -194,7 +194,7 @@ _load_file (MateSettingsManager *manager,
 	       g_warning ("Ignoring unknown module '%s'", schema_name);
 	}
 
-        g_free (schema);
+        g_free (schema_name);
 
  out:
         if (info != NULL) {
