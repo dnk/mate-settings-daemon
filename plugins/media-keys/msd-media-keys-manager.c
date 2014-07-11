@@ -1230,7 +1230,12 @@ msd_media_keys_manager_stop (MsdMediaKeysManager *manager)
 
         if (need_flush)
                 gdk_flush ();
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 
         g_slist_free (priv->screens);
         priv->screens = NULL;
@@ -1269,10 +1274,6 @@ msd_media_keys_manager_set_property (GObject        *object,
                                const GValue   *value,
                                GParamSpec     *pspec)
 {
-        MsdMediaKeysManager *self;
-
-        self = MSD_MEDIA_KEYS_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1286,10 +1287,6 @@ msd_media_keys_manager_get_property (GObject        *object,
                                GValue         *value,
                                GParamSpec     *pspec)
 {
-        MsdMediaKeysManager *self;
-
-        self = MSD_MEDIA_KEYS_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1303,9 +1300,6 @@ msd_media_keys_manager_constructor (GType                  type,
                               GObjectConstructParam *construct_properties)
 {
         MsdMediaKeysManager      *media_keys_manager;
-        MsdMediaKeysManagerClass *klass;
-
-        klass = MSD_MEDIA_KEYS_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_MEDIA_KEYS_MANAGER));
 
         media_keys_manager = MSD_MEDIA_KEYS_MANAGER (G_OBJECT_CLASS (msd_media_keys_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -1317,10 +1311,6 @@ msd_media_keys_manager_constructor (GType                  type,
 static void
 msd_media_keys_manager_dispose (GObject *object)
 {
-        MsdMediaKeysManager *media_keys_manager;
-
-        media_keys_manager = MSD_MEDIA_KEYS_MANAGER (object);
-
         G_OBJECT_CLASS (msd_media_keys_manager_parent_class)->dispose (object);
 }
 

@@ -151,7 +151,11 @@ send_selection_notify (MsdClipboardManager *manager,
                     (XEvent *)&notify);
         XSync (manager->priv->display, False);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 }
 
 static void
@@ -178,7 +182,11 @@ finish_selection_request (MsdClipboardManager *manager,
                     False, NoEventMask, (XEvent *) &notify);
         XSync (manager->priv->display, False);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 }
 
 static int
@@ -554,7 +562,11 @@ convert_clipboard_target (IncrConversion      *rdata,
 
                         XSync (manager->priv->display, False);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+                        gdk_error_trap_pop_ignored ();
+#else
                         gdk_error_trap_pop ();
+#endif
                 }
         }
 }
@@ -961,10 +973,6 @@ msd_clipboard_manager_set_property (GObject        *object,
                                     const GValue   *value,
                                     GParamSpec     *pspec)
 {
-        MsdClipboardManager *self;
-
-        self = MSD_CLIPBOARD_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -978,10 +986,6 @@ msd_clipboard_manager_get_property (GObject        *object,
                                     GValue         *value,
                                     GParamSpec     *pspec)
 {
-        MsdClipboardManager *self;
-
-        self = MSD_CLIPBOARD_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -995,9 +999,6 @@ msd_clipboard_manager_constructor (GType                  type,
                                    GObjectConstructParam *construct_properties)
 {
         MsdClipboardManager      *clipboard_manager;
-        MsdClipboardManagerClass *klass;
-
-        klass = MSD_CLIPBOARD_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_CLIPBOARD_MANAGER));
 
         clipboard_manager = MSD_CLIPBOARD_MANAGER (G_OBJECT_CLASS (msd_clipboard_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -1009,10 +1010,6 @@ msd_clipboard_manager_constructor (GType                  type,
 static void
 msd_clipboard_manager_dispose (GObject *object)
 {
-        MsdClipboardManager *clipboard_manager;
-
-        clipboard_manager = MSD_CLIPBOARD_MANAGER (object);
-
         G_OBJECT_CLASS (msd_clipboard_manager_parent_class)->dispose (object);
 }
 

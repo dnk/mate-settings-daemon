@@ -101,7 +101,7 @@ devicepresence_filter (GdkXEvent *xevent,
                        gpointer   data)
 {
         XEvent *xev = (XEvent *) xevent;
-        XEventClass class_presence;
+        G_GNUC_UNUSED XEventClass class_presence;
         int xi_presence;
 
         DevicePresence (gdk_x11_get_default_xdisplay (), xi_presence, class_presence);
@@ -133,7 +133,7 @@ set_devicepresence_handler (MsdA11yKeyboardManager *manager)
 {
         Display *display;
         XEventClass class_presence;
-        int xi_presence;
+        G_GNUC_UNUSED int xi_presence;
 
         if (!supports_xinput_devices ())
                 return;
@@ -185,7 +185,11 @@ get_xkb_desc_rec (MsdA11yKeyboardManager *manager)
                 desc->ctrls = NULL;
                 status = XkbGetControls (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), XkbAllControlsMask, desc);
         }
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 
         g_return_val_if_fail (desc != NULL, NULL);
         g_return_val_if_fail (desc->ctrls != NULL, NULL);
@@ -392,7 +396,12 @@ set_server_from_settings (MsdA11yKeyboardManager *manager)
         XkbFreeKeyboard (desc, XkbAllComponentsMask, True);
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 
         mate_settings_profile_end (NULL);
 }
@@ -655,7 +664,11 @@ ax_slowkeys_warning_post_dialog (MsdA11yKeyboardManager *manager,
                                                   "%s", message);
 
         gtk_dialog_add_button (GTK_DIALOG (manager->priv->slowkeys_alert),
+#if GTK_CHECK_VERSION (3, 10, 0)
+				_("_Help"),
+#else
                                GTK_STOCK_HELP,
+#endif
                                GTK_RESPONSE_HELP);
         gtk_dialog_add_button (GTK_DIALOG (manager->priv->slowkeys_alert),
                                enabled ? _("Do_n't activate") : _("Do_n't deactivate"),
@@ -794,7 +807,11 @@ ax_stickykeys_warning_post_dialog (MsdA11yKeyboardManager *manager,
                                                   "%s", message);
 
         gtk_dialog_add_button (GTK_DIALOG (manager->priv->stickykeys_alert),
+#if GTK_CHECK_VERSION (3, 10, 0)
+                               _("_Help"),
+#else
                                GTK_STOCK_HELP,
+#endif
                                GTK_RESPONSE_HELP);
         gtk_dialog_add_button (GTK_DIALOG (manager->priv->stickykeys_alert),
                                enabled ? _("Do_n't activate") : _("Do_n't deactivate"),
@@ -1073,7 +1090,12 @@ restore_server_xkb_config (MsdA11yKeyboardManager *manager)
                          XkbAllComponentsMask, True);
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 
         manager->priv->original_xkb_desc = NULL;
 }
@@ -1121,10 +1143,6 @@ msd_a11y_keyboard_manager_set_property (GObject        *object,
                                         const GValue   *value,
                                         GParamSpec     *pspec)
 {
-        MsdA11yKeyboardManager *self;
-
-        self = MSD_A11Y_KEYBOARD_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1138,10 +1156,6 @@ msd_a11y_keyboard_manager_get_property (GObject        *object,
                                         GValue         *value,
                                         GParamSpec     *pspec)
 {
-        MsdA11yKeyboardManager *self;
-
-        self = MSD_A11Y_KEYBOARD_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1155,9 +1169,6 @@ msd_a11y_keyboard_manager_constructor (GType                  type,
                                        GObjectConstructParam *construct_properties)
 {
         MsdA11yKeyboardManager      *a11y_keyboard_manager;
-        MsdA11yKeyboardManagerClass *klass;
-
-        klass = MSD_A11Y_KEYBOARD_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_A11Y_KEYBOARD_MANAGER));
 
         a11y_keyboard_manager = MSD_A11Y_KEYBOARD_MANAGER (G_OBJECT_CLASS (msd_a11y_keyboard_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -1169,10 +1180,6 @@ msd_a11y_keyboard_manager_constructor (GType                  type,
 static void
 msd_a11y_keyboard_manager_dispose (GObject *object)
 {
-        MsdA11yKeyboardManager *a11y_keyboard_manager;
-
-        a11y_keyboard_manager = MSD_A11Y_KEYBOARD_MANAGER (object);
-
         G_OBJECT_CLASS (msd_a11y_keyboard_manager_parent_class)->dispose (object);
 }
 

@@ -153,8 +153,7 @@ ignore_check_button_toggled_cb (GtkToggleButton *button,
         GSettings *settings;
         gchar **settings_list;
         GSList *ignore_paths = NULL;
-        GError *error = NULL;
-        gboolean ignore, ret, updated;
+        gboolean ignore, updated;
         gint i;
 
         settings = g_settings_new (SETTINGS_SCHEMA);
@@ -206,8 +205,13 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
 
         /* Set up all the window stuff here */
         gtk_window_set_title (GTK_WINDOW (dialog), _("Low Disk Space"));
-        gtk_window_set_icon_name (GTK_WINDOW (dialog), 
+#if GTK_CHECK_VERSION (3, 10, 0)
+        gtk_window_set_icon_name (GTK_WINDOW (dialog),
+                                  "gtk-dialog-warning");
+#else
+        gtk_window_set_icon_name (GTK_WINDOW (dialog),
                                   GTK_STOCK_DIALOG_WARNING);
+#endif
         gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
         gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
         gtk_window_set_urgency_hint (GTK_WINDOW (dialog), TRUE);
@@ -215,7 +219,11 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 
         /* Create the image */
+#if GTK_CHECK_VERSION (3, 10, 0)
+        image = gtk_image_new_from_icon_name ("gtk-dialog-warning", GTK_ICON_SIZE_DIALOG);
+#else
         image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_DIALOG);
+#endif
         gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
 
         /* Create the labels */
@@ -447,7 +455,11 @@ msd_ldsm_dialog_new (gboolean     other_usable_partitions,
                 button_empty_trash = gtk_dialog_add_button (GTK_DIALOG (dialog),
                                                             _("Empty Trash"),
                                                             MSD_LDSM_DIALOG_RESPONSE_EMPTY_TRASH);
+#if GTK_CHECK_VERSION (3, 10, 0)
+                empty_trash_image = gtk_image_new_from_icon_name ("gtk-clear", GTK_ICON_SIZE_BUTTON);
+#else
                 empty_trash_image = gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_BUTTON);
+#endif
                 gtk_button_set_image (GTK_BUTTON (button_empty_trash), empty_trash_image);
         }
 	
@@ -462,7 +474,11 @@ msd_ldsm_dialog_new (gboolean     other_usable_partitions,
         button_ignore = gtk_dialog_add_button (GTK_DIALOG (dialog), 
                                                _("Ignore"), 
                                                GTK_RESPONSE_CANCEL);
+#if GTK_CHECK_VERSION (3, 10, 0)
+        ignore_image = gtk_image_new_from_icon_name ("gtk-cancel", GTK_ICON_SIZE_BUTTON);
+#else
         ignore_image = gtk_image_new_from_stock (GTK_STOCK_CANCEL, GTK_ICON_SIZE_BUTTON);
+#endif
         gtk_button_set_image (GTK_BUTTON (button_ignore), ignore_image);
 	
         gtk_widget_grab_default (button_ignore);

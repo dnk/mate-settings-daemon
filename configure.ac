@@ -118,7 +118,7 @@ GLIB_GSETTINGS
 dnl ---------------------------------------------------------------------------
 dnl - Check for mate-desktop
 dnl ---------------------------------------------------------------------------
-PKG_CHECK_MODULES(MATE_DESKTOP, mate-desktop-2.0 >= $MATE_DESKTOP_REQUIRED_VERSION)
+PKG_CHECK_MODULES(MATE_DESKTOP, mate-desktop-$GTK_API_VERSION >= $MATE_DESKTOP_REQUIRED_VERSION)
 
 dnl ---------------------------------------------------------------------------
 dnl - Check for libnotify

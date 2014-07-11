@@ -368,10 +368,6 @@ msd_mpris_manager_set_property (GObject        *object,
                                 const GValue   *value,
                                 GParamSpec     *pspec)
 {
-    MsdMprisManager *self;
-
-    self = MSD_MPRIS_MANAGER (object);
-
     switch (prop_id) {
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -385,10 +381,6 @@ msd_mpris_manager_get_property (GObject        *object,
                                 GValue         *value,
                                 GParamSpec     *pspec)
 {
-    MsdMprisManager *self;
-
-    self = MSD_MPRIS_MANAGER (object);
-
     switch (prop_id) {
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -402,9 +394,6 @@ msd_mpris_manager_constructor (GType                  type,
                                GObjectConstructParam *construct_properties)
 {
     MsdMprisManager      *mpris_manager;
-    MsdMprisManagerClass *klass;
-
-    klass = MSD_MPRIS_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_MPRIS_MANAGER));
 
     mpris_manager = MSD_MPRIS_MANAGER (G_OBJECT_CLASS (msd_mpris_manager_parent_class)->constructor (type,
                                                                                                      n_construct_properties,
@@ -416,10 +405,6 @@ msd_mpris_manager_constructor (GType                  type,
 static void
 msd_mpris_manager_dispose (GObject *object)
 {
-    MsdMprisManager *mpris_manager;
-
-    mpris_manager = MSD_MPRIS_MANAGER (object);
-
     G_OBJECT_CLASS (msd_mpris_manager_parent_class)->dispose (object);
 }
 

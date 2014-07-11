@@ -105,10 +105,6 @@ msd_mouse_manager_set_property (GObject        *object,
                                const GValue   *value,
                                GParamSpec     *pspec)
 {
-        MsdMouseManager *self;
-
-        self = MSD_MOUSE_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -122,10 +118,6 @@ msd_mouse_manager_get_property (GObject        *object,
                                GValue         *value,
                                GParamSpec     *pspec)
 {
-        MsdMouseManager *self;
-
-        self = MSD_MOUSE_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -139,9 +131,6 @@ msd_mouse_manager_constructor (GType                  type,
                               GObjectConstructParam *construct_properties)
 {
         MsdMouseManager      *mouse_manager;
-        MsdMouseManagerClass *klass;
-
-        klass = MSD_MOUSE_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_MOUSE_MANAGER));
 
         mouse_manager = MSD_MOUSE_MANAGER (G_OBJECT_CLASS (msd_mouse_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -153,10 +142,6 @@ msd_mouse_manager_constructor (GType                  type,
 static void
 msd_mouse_manager_dispose (GObject *object)
 {
-        MsdMouseManager *mouse_manager;
-
-        mouse_manager = MSD_MOUSE_MANAGER (object);
-
         G_OBJECT_CLASS (msd_mouse_manager_parent_class)->dispose (object);
 }
 
@@ -293,7 +278,11 @@ touchpad_has_single_button (XDevice *device)
         if (rc == Success)
                 XFree (data);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 
         return is_single_button;
 }
@@ -381,7 +370,7 @@ devicepresence_filter (GdkXEvent *xevent,
                        gpointer   data)
 {
         XEvent *xev = (XEvent *) xevent;
-        XEventClass class_presence;
+        G_GNUC_UNUSED XEventClass class_presence;
         int xi_presence;
 
         DevicePresence (gdk_x11_get_default_xdisplay (), xi_presence, class_presence);
@@ -400,7 +389,7 @@ set_devicepresence_handler (MsdMouseManager *manager)
 {
         Display *display;
         XEventClass class_presence;
-        int xi_presence;
+        G_GNUC_UNUSED int xi_presence;
 
         if (!supports_xinput_devices ())
                 return;
@@ -559,7 +548,11 @@ set_middle_button (MsdMouseManager *manager,
                         XChangeDeviceProperty (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                                                device, prop, type, format, PropModeReplace, data, nitems);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+                        gdk_error_trap_pop_ignored ();
+#else
                         gdk_error_trap_pop ();
+#endif
                 }
 
                 XFree (data);
@@ -596,11 +589,19 @@ device_is_touchpad (XDeviceInfo deviceinfo)
         if ((XGetDeviceProperty (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), device, prop, 0, 1, False,
                                 XA_INTEGER, &realtype, &realformat, &nitems,
                                 &bytes_after, &data) == Success) && (realtype != None)) {
+#if GTK_CHECK_VERSION (3, 0, 0)
+                gdk_error_trap_pop_ignored ();
+#else
                 gdk_error_trap_pop ();
+#endif
                 XFree (data);
                 return device;
         }
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 
         XCloseDevice (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), device);
         return NULL;
@@ -899,6 +900,7 @@ set_locate_pointer (MsdMouseManager *manager,
         }
 }
 
+#if 0
 static void
 set_mousetweaks_daemon (MsdMouseManager *manager,
                         gboolean         dwell_enable,
@@ -961,6 +963,7 @@ set_mousetweaks_daemon (MsdMouseManager *manager,
         }
         g_free (comm);
 }
+#endif
 
 static void
 set_mouse_settings (MsdMouseManager *manager)

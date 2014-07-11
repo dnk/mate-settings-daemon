@@ -2347,7 +2347,11 @@ msd_xrandr_manager_start (MsdXrandrManager *manager,
                           True, GrabModeAsync, GrabModeAsync);
 
                 gdk_flush ();
+#if GTK_CHECK_VERSION (3, 0, 0)
+                gdk_error_trap_pop_ignored ();
+#else
                 gdk_error_trap_pop ();
+#endif
         }
 
         if (manager->priv->rotate_windows_keycode) {
@@ -2359,7 +2363,11 @@ msd_xrandr_manager_start (MsdXrandrManager *manager,
                           True, GrabModeAsync, GrabModeAsync);
 
                 gdk_flush ();
+#if GTK_CHECK_VERSION (3, 0, 0)
+                gdk_error_trap_pop_ignored ();
+#else
                 gdk_error_trap_pop ();
+#endif
         }
 
         show_timestamps_dialog (manager, "Startup");
@@ -2398,7 +2406,11 @@ msd_xrandr_manager_stop (MsdXrandrManager *manager)
                             manager->priv->switch_video_mode_keycode, AnyModifier,
                             gdk_x11_get_default_root_xwindow());
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+                gdk_error_trap_pop_ignored ();
+#else
                 gdk_error_trap_pop ();
+#endif
         }
 
         if (manager->priv->rotate_windows_keycode) {
@@ -2408,7 +2420,11 @@ msd_xrandr_manager_stop (MsdXrandrManager *manager)
                             manager->priv->rotate_windows_keycode, AnyModifier,
                             gdk_x11_get_default_root_xwindow());
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+                gdk_error_trap_pop_ignored ();
+#else
                 gdk_error_trap_pop ();
+#endif
         }
 
         gdk_window_remove_filter (gdk_get_default_root_window (),
@@ -2443,10 +2459,6 @@ msd_xrandr_manager_set_property (GObject        *object,
                                const GValue   *value,
                                GParamSpec     *pspec)
 {
-        MsdXrandrManager *self;
-
-        self = MSD_XRANDR_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -2460,10 +2472,6 @@ msd_xrandr_manager_get_property (GObject        *object,
                                GValue         *value,
                                GParamSpec     *pspec)
 {
-        MsdXrandrManager *self;
-
-        self = MSD_XRANDR_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -2477,9 +2485,6 @@ msd_xrandr_manager_constructor (GType                  type,
                               GObjectConstructParam *construct_properties)
 {
         MsdXrandrManager      *xrandr_manager;
-        MsdXrandrManagerClass *klass;
-
-        klass = MSD_XRANDR_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_XRANDR_MANAGER));
 
         xrandr_manager = MSD_XRANDR_MANAGER (G_OBJECT_CLASS (msd_xrandr_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -2491,10 +2496,6 @@ msd_xrandr_manager_constructor (GType                  type,
 static void
 msd_xrandr_manager_dispose (GObject *object)
 {
-        MsdXrandrManager *xrandr_manager;
-
-        xrandr_manager = MSD_XRANDR_MANAGER (object);
-
         G_OBJECT_CLASS (msd_xrandr_manager_parent_class)->dispose (object);
 }
 

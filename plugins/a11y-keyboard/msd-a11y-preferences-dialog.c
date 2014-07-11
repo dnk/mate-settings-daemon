@@ -818,7 +818,11 @@ msd_a11y_preferences_dialog_init (MsdA11yPreferencesDialog *dialog)
                       NULL);
 
         gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+#if GTK_CHECK_VERSION (3, 10, 0)
+                                _("_Close"), GTK_RESPONSE_CLOSE,
+#else
                                 GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE,
+#endif
                                 NULL);
         g_signal_connect (dialog,
                           "response",

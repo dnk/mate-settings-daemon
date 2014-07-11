@@ -530,10 +530,6 @@ msd_xrdb_manager_set_property (GObject        *object,
                                const GValue   *value,
                                GParamSpec     *pspec)
 {
-        MsdXrdbManager *self;
-
-        self = MSD_XRDB_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -547,10 +543,6 @@ msd_xrdb_manager_get_property (GObject        *object,
                                GValue         *value,
                                GParamSpec     *pspec)
 {
-        MsdXrdbManager *self;
-
-        self = MSD_XRDB_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -564,9 +556,6 @@ msd_xrdb_manager_constructor (GType                  type,
                               GObjectConstructParam *construct_properties)
 {
         MsdXrdbManager      *xrdb_manager;
-        MsdXrdbManagerClass *klass;
-
-        klass = MSD_XRDB_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_XRDB_MANAGER));
 
         xrdb_manager = MSD_XRDB_MANAGER (G_OBJECT_CLASS (msd_xrdb_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -578,10 +567,6 @@ msd_xrdb_manager_constructor (GType                  type,
 static void
 msd_xrdb_manager_dispose (GObject *object)
 {
-        MsdXrdbManager *xrdb_manager;
-
-        xrdb_manager = MSD_XRDB_MANAGER (object);
-
         G_OBJECT_CLASS (msd_xrdb_manager_parent_class)->dispose (object);
 }
 

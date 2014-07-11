@@ -145,29 +145,12 @@ on_plugin_deactivated (MateSettingsPluginInfo *info,
         g_signal_emit (manager, signals [PLUGIN_DEACTIVATED], 0, name);
 }
 
-static gboolean
-is_item_in_schema (const char * const *items,
-                   const char         *item)
-{
-	while (*items) {
-	       if (g_strcmp0 (*items++, item) == 0)
-		       return TRUE;
-	}
-	return FALSE;
-}
-
-static gboolean
-is_schema (const char *schema)
-{
-	return is_item_in_schema (g_settings_list_schemas (), schema);
-}
-
 static void
 _load_file (MateSettingsManager *manager,
             const char           *filename)
 {
         MateSettingsPluginInfo  *info;
-        char                    *schema;
+        gchar                    *schema_name;
         GSList                  *l;
 
         g_debug ("Loading plugin: %s", filename);
@@ -188,12 +171,14 @@ _load_file (MateSettingsManager *manager,
         manager->priv->plugins = g_slist_prepend (manager->priv->plugins,
                                                   g_object_ref (info));
 
-        schema = g_strdup_printf ("%s.plugins.%s",
+        schema_name = g_strdup_printf ("%s.plugins.%s",
                                   DEFAULT_SETTINGS_PREFIX,
                                   mate_settings_plugin_info_get_location (info));
         
 	/* Ignore unknown schemas or else we'll assert */
-	if (is_schema (schema)) {
+	GSettingsSchemaSource *default_source = g_settings_schema_source_get_default ();
+	GSettingsSchema *schema = g_settings_schema_source_lookup(default_source, schema_name, TRUE);
+	if (schema != NULL) {
 	       manager->priv->plugins = g_slist_prepend (manager->priv->plugins,
 		                                         g_object_ref (info));
 
@@ -204,8 +189,9 @@ _load_file (MateSettingsManager *manager,
 
 	       /* Also sets priority for plugins */
 	       mate_settings_plugin_info_set_schema (info, schema);
+	       g_settings_schema_unref (schema);
 	} else {
-	       g_warning ("Ignoring unknown module '%s'", schema);
+	       g_warning ("Ignoring unknown module '%s'", schema_name);
 	}
 
         g_free (schema);
@@ -374,9 +360,6 @@ mate_settings_manager_constructor (GType                  type,
                                     GObjectConstructParam *construct_properties)
 {
         MateSettingsManager      *manager;
-        MateSettingsManagerClass *klass;
-
-        klass = MATE_SETTINGS_MANAGER_CLASS (g_type_class_peek (MATE_TYPE_SETTINGS_MANAGER));
 
         manager = MATE_SETTINGS_MANAGER (G_OBJECT_CLASS (mate_settings_manager_parent_class)->constructor (type,
                                                                                                          n_construct_properties,

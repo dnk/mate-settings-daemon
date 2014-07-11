@@ -596,13 +596,13 @@ mate_settings_plugin_info_set_priority (MateSettingsPluginInfo *info,
 
 void
 mate_settings_plugin_info_set_schema (MateSettingsPluginInfo *info,
-                                      gchar                  *schema)
+                                      GSettingsSchema        *schema)
 {
 	int priority;
 
 	g_return_if_fail (MATE_IS_SETTINGS_PLUGIN_INFO (info));
 
-	info->priv->settings = g_settings_new (schema);
+	info->priv->settings = g_settings_new_full (schema, NULL, NULL);
 	info->priv->enabled = g_settings_get_boolean (info->priv->settings, "active");
 
 	priority = g_settings_get_int (info->priv->settings, "priority");

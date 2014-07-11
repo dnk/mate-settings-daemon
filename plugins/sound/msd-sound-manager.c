@@ -336,9 +336,6 @@ msd_sound_manager_constructor (
                 GObjectConstructParam *construct_properties)
 {
         MsdSoundManager *m;
-        MsdSoundManagerClass *klass;
-
-        klass = MSD_SOUND_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_SOUND_MANAGER));
 
         m = MSD_SOUND_MANAGER (G_OBJECT_CLASS (msd_sound_manager_parent_class)->constructor (
                                                            type,

@@ -72,7 +72,7 @@ int              mate_settings_plugin_info_get_priority    (MateSettingsPluginIn
 void             mate_settings_plugin_info_set_priority    (MateSettingsPluginInfo *info,
                                                             int                     priority);
 void             mate_settings_plugin_info_set_schema      (MateSettingsPluginInfo *info,
-                                                            gchar                  *schema);
+                                                            GSettingsSchema        *schema);
 #ifdef __cplusplus
 }
 #endif

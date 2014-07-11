@@ -312,7 +312,12 @@ apply_settings (GSettings          *settings,
 #endif /* HAVE_X11_EXTENSIONS_XKB_H */
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 }
 
 void
@@ -394,10 +399,6 @@ msd_keyboard_manager_set_property (GObject        *object,
                                    const GValue   *value,
                                    GParamSpec     *pspec)
 {
-        MsdKeyboardManager *self;
-
-        self = MSD_KEYBOARD_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -411,10 +412,6 @@ msd_keyboard_manager_get_property (GObject        *object,
                                    GValue         *value,
                                    GParamSpec     *pspec)
 {
-        MsdKeyboardManager *self;
-
-        self = MSD_KEYBOARD_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -428,9 +425,6 @@ msd_keyboard_manager_constructor (GType                  type,
                                   GObjectConstructParam *construct_properties)
 {
         MsdKeyboardManager      *keyboard_manager;
-        MsdKeyboardManagerClass *klass;
-
-        klass = MSD_KEYBOARD_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_KEYBOARD_MANAGER));
 
         keyboard_manager = MSD_KEYBOARD_MANAGER (G_OBJECT_CLASS (msd_keyboard_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -442,10 +436,6 @@ msd_keyboard_manager_constructor (GType                  type,
 static void
 msd_keyboard_manager_dispose (GObject *object)
 {
-        MsdKeyboardManager *keyboard_manager;
-
-        keyboard_manager = MSD_KEYBOARD_MANAGER (object);
-
         G_OBJECT_CLASS (msd_keyboard_manager_parent_class)->dispose (object);
 }
 

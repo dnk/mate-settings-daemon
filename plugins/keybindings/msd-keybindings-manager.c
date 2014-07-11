@@ -334,7 +334,12 @@ binding_unregister_keys (MsdKeybindingsManager *manager)
 
         if (need_flush)
                 gdk_flush ();
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gdk_error_trap_pop_ignored ();
+#else
         gdk_error_trap_pop ();
+#endif
 }
 
 static void
@@ -623,10 +628,6 @@ msd_keybindings_manager_set_property (GObject        *object,
                                const GValue   *value,
                                GParamSpec     *pspec)
 {
-        MsdKeybindingsManager *self;
-
-        self = MSD_KEYBINDINGS_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -640,10 +641,6 @@ msd_keybindings_manager_get_property (GObject        *object,
                                GValue         *value,
                                GParamSpec     *pspec)
 {
-        MsdKeybindingsManager *self;
-
-        self = MSD_KEYBINDINGS_MANAGER (object);
-
         switch (prop_id) {
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -657,9 +654,6 @@ msd_keybindings_manager_constructor (GType                  type,
                               GObjectConstructParam *construct_properties)
 {
         MsdKeybindingsManager      *keybindings_manager;
-        MsdKeybindingsManagerClass *klass;
-
-        klass = MSD_KEYBINDINGS_MANAGER_CLASS (g_type_class_peek (MSD_TYPE_KEYBINDINGS_MANAGER));
 
         keybindings_manager = MSD_KEYBINDINGS_MANAGER (G_OBJECT_CLASS (msd_keybindings_manager_parent_class)->constructor (type,
                                                                                                       n_construct_properties,
@@ -671,10 +665,6 @@ msd_keybindings_manager_constructor (GType                  type,
 static void
 msd_keybindings_manager_dispose (GObject *object)
 {
-        MsdKeybindingsManager *keybindings_manager;
-
-        keybindings_manager = MSD_KEYBINDINGS_MANAGER (object);
-
         G_OBJECT_CLASS (msd_keybindings_manager_parent_class)->dispose (object);
 }
 
