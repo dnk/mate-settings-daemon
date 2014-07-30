@@ -55,18 +55,28 @@ locate_pointer_paint (MsdLocatePointerData *data,
 		      cairo_t              *cr,
 		      gboolean              composite)
 {
+#if GTK_CHECK_VERSION (3, 0, 0)
+  GdkRGBA  color;
+  GtkStyleContext *style;
+#else
   GdkColor color;
+  GtkStyle *style;
+#endif
   gdouble progress, circle_progress;
   gint width, height, i;
-  GtkStyle *style;
 
   progress = data->progress;
 
   width = gdk_window_get_width (data->window);
   height = gdk_window_get_height (data->window);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+  style = gtk_widget_get_style_context (data->widget);
+  gtk_style_context_get (style, GTK_STATE_FLAG_SELECTED, GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &color, NULL);
+#else
   style = gtk_widget_get_style (data->widget);
   color = style->bg[GTK_STATE_SELECTED];
+#endif
 
   cairo_set_source_rgba (cr, 1., 1., 1., 0.);
   cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
@@ -85,11 +95,15 @@ locate_pointer_paint (MsdLocatePointerData *data,
 
       if (composite)
 	{
+#if GTK_CHECK_VERSION (3, 0, 0)
+	  cairo_set_source_rgba (cr, color.red, color.green, color.blue, 1 - circle_progress);
+#else
 	  cairo_set_source_rgba (cr,
 				 color.red / 65535.,
 				 color.green / 65535.,
 				 color.blue / 65535.,
 				 1 - circle_progress);
+#endif
 	  cairo_arc (cr,
 		     width / 2,
 		     height / 2,
@@ -206,8 +220,16 @@ timeline_frame_cb (MsdTimeline *timeline,
     }
 
   screen = gdk_window_get_screen (data->window);
+#if GTK_CHECK_VERSION (3, 0, 0)
+  GdkDeviceManager *device_manager = gdk_display_get_device_manager (gdk_screen_get_display (screen));
+  GdkDevice *client_pointer = gdk_device_manager_get_client_pointer (device_manager);
+  gdk_window_get_device_position (gdk_screen_get_root_window (screen),
+                          client_pointer,
+			  &cursor_x, &cursor_y, NULL);
+#else
   gdk_window_get_pointer (gdk_screen_get_root_window (screen),
 			  &cursor_x, &cursor_y, NULL);
+#endif
   gdk_window_move (data->window,
                    cursor_x - WINDOW_SIZE / 2,
                    cursor_y - WINDOW_SIZE / 2);
@@ -364,7 +386,15 @@ move_locate_pointer_window (MsdLocatePointerData *data,
   cairo_t *cr;
 #endif
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+  GdkDeviceManager *device_manager = gdk_display_get_device_manager (gdk_screen_get_display (screen));
+  GdkDevice *client_pointer = gdk_device_manager_get_client_pointer (device_manager);
+  gdk_window_get_device_position (gdk_screen_get_root_window (screen),
+                          client_pointer,
+			  &cursor_x, &cursor_y, NULL);
+#else
   gdk_window_get_pointer (gdk_screen_get_root_window (screen), &cursor_x, &cursor_y, NULL);
+#endif
 
   gdk_window_move_resize (data->window,
                           cursor_x - WINDOW_SIZE / 2,

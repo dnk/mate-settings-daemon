@@ -60,24 +60,57 @@ static void     msd_xrdb_manager_finalize    (GObject             *object);
 G_DEFINE_TYPE (MsdXrdbManager, msd_xrdb_manager, G_TYPE_OBJECT)
 
 static gpointer manager_object = NULL;
-static void
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+static void
+append_color_define (GString        *string,
+                     const char     *name,
+                     const GdkRGBA *color)
+#else
+static void
 append_color_define (GString        *string,
                      const char     *name,
                      const GdkColor *color)
+#endif
 {
         g_return_if_fail (string != NULL);
         g_return_if_fail (name != NULL);
         g_return_if_fail (color != NULL);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        unsigned red = color->red * 0xffff;
+        unsigned green = color->green * 0xffff;
+        unsigned blue = color->blue * 0xffff;
+        g_string_append_printf (string,
+                                "#define %s #%2.2hx%2.2hx%2.2hx\n",
+                                name,
+                                red>>8,
+                                green>>8,
+                                blue>>8);
+#else
         g_string_append_printf (string,
                                 "#define %s #%2.2hx%2.2hx%2.2hx\n",
                                 name,
                                 color->red>>8,
                                 color->green>>8,
                                 color->blue>>8);
+#endif
 }
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+static GdkRGBA*
+color_shade (GdkRGBA *a,
+             gdouble   shade,
+             GdkRGBA *b)
+{
+        b->red = CLAMP ((a->red) * shade, 0, 1.0);
+        b->green = CLAMP ((a->green) * shade, 0, 1.0);
+        b->blue = CLAMP ((a->blue) * shade, 0, 1.0);
+
+        return b;
+}
+
+#else
 static GdkColor*
 color_shade (GdkColor *a,
              gdouble   shade,
@@ -95,16 +128,83 @@ color_shade (GdkColor *a,
 
         return b;
 }
+#endif
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+static void
+append_theme_colors (GtkStyleContext *style,
+                     GString  *string)
+#else
 static void
 append_theme_colors (GtkStyle *style,
                      GString  *string)
+#endif
 {
+#if GTK_CHECK_VERSION (3, 0, 0)
+        GdkRGBA bg_color, fg_color;
+        GdkRGBA bg_selected_color, fg_selected_color;
+        GdkRGBA bg_insensitive_color, fg_insensitive_color;
+        GdkRGBA tmp;
+#else
         GdkColor tmp;
+#endif
 
         g_return_if_fail (style != NULL);
         g_return_if_fail (string != NULL);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
+                               GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &bg_color,
+                               GTK_STYLE_PROPERTY_COLOR, &fg_color,
+                               NULL);
+        gtk_style_context_get (style, GTK_STATE_FLAG_SELECTED,
+                               GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &bg_selected_color,
+                               GTK_STYLE_PROPERTY_COLOR, &fg_selected_color,
+                               NULL);
+        gtk_style_context_get (style, GTK_STATE_FLAG_INSENSITIVE,
+                               GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &bg_insensitive_color,
+                               GTK_STYLE_PROPERTY_COLOR, &fg_insensitive_color,
+                               NULL);
+
+
+        append_color_define (string,
+                             "BACKGROUND",
+                             &bg_color);
+        append_color_define (string,
+                             "FOREGROUND",
+                             &fg_color);
+        append_color_define (string,
+                             "SELECT_BACKGROUND",
+                             &bg_selected_color);
+        append_color_define (string,
+                             "SELECT_FOREGROUND",
+                             &fg_selected_color);
+        append_color_define (string,
+                             "WINDOW_BACKGROUND",
+                             &bg_color);
+        append_color_define (string,
+                             "WINDOW_FOREGROUND",
+                             &fg_color);
+        append_color_define (string,
+                             "INACTIVE_BACKGROUND",
+                             &bg_insensitive_color);
+        append_color_define (string,
+                             "INACTIVE_FOREGROUND",
+                             &fg_insensitive_color);
+        append_color_define (string,
+                             "ACTIVE_BACKGROUND",
+                             &bg_selected_color);
+        append_color_define (string,
+                             "ACTIVE_FOREGROUND",
+                             &fg_selected_color);
+
+        append_color_define (string,
+                             "HIGHLIGHT",
+                             color_shade (&bg_color, 1.2, &tmp));
+        append_color_define (string,
+                             "LOWLIGHT",
+                             color_shade (&bg_color, 2.0/3.0, &tmp));
+#else
         append_color_define (string,
                              "BACKGROUND",
                              &style->bg[GTK_STATE_NORMAL]);
@@ -142,6 +242,7 @@ append_theme_colors (GtkStyle *style,
         append_color_define (string,
                              "LOWLIGHT",
                              color_shade (&style->bg[GTK_STATE_NORMAL], 2.0/3.0, &tmp));
+#endif
         return;
 }
 
@@ -418,9 +519,15 @@ spawn_with_input (const char *command,
         g_child_watch_add (child_pid, (GChildWatchFunc) child_watch_cb, (gpointer)command);
 }
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+static void
+apply_settings (MsdXrdbManager *manager,
+                GtkStyleContext *style)
+#else
 static void
 apply_settings (MsdXrdbManager *manager,
                 GtkStyle       *style)
+#endif
 {
         const char *command;
         GString    *string;
@@ -481,7 +588,11 @@ theme_changed (GtkSettings    *settings,
                GParamSpec     *pspec,
                MsdXrdbManager *manager)
 {
+#if GTK_CHECK_VERSION (3, 0, 0)
+        apply_settings (manager, gtk_widget_get_style_context (manager->priv->widget));
+#else
         apply_settings (manager, gtk_widget_get_style (manager->priv->widget));
+#endif
 }
 
 gboolean
@@ -500,7 +611,9 @@ msd_xrdb_manager_start (MsdXrdbManager *manager,
                           manager);
 
         manager->priv->widget = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+#if !GTK_CHECK_VERSION (3, 0, 0)
         gtk_widget_ensure_style (manager->priv->widget);
+#endif
 
         mate_settings_profile_end (NULL);
 

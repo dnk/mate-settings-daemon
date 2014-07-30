@@ -459,7 +459,7 @@ main (int argc, char *argv[])
         parse_args (&argc, &argv);
 
         mate_settings_profile_start ("opening gtk display");
-        if (! gtk_init_check (NULL, NULL)) {
+        if (! gtk_init_check (&argc, &argv)) {
                 g_warning ("Unable to initialize GTK+");
                 exit (EXIT_FAILURE);
         }

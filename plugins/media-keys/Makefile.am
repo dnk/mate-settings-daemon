@@ -88,16 +88,19 @@ libmedia_keys_la_CPPFLAGS = \
 
 libmedia_keys_la_CFLAGS = \
 	$(SETTINGS_PLUGIN_CFLAGS)	\
+	$(MATE_DESKTOP_CFLAGS)		\
 	$(AM_CFLAGS)
 
 libmedia_keys_la_LDFLAGS = 		\
-	$(MSD_PLUGIN_LDFLAGS)
+	$(MSD_PLUGIN_LDFLAGS)		\
+	$(MATE_DESKTOP_LDFLAGS)
 
 libmedia_keys_la_LIBADD  = 		\
 	$(top_builddir)/plugins/common/libcommon.la			\
 	$(top_builddir)/plugins/media-keys/cut-n-paste/libgvc.la	\
 	$(SETTINGS_PLUGIN_LIBS)						\
 	$(XF86MISC_LIBS)						\
+	$(MATE_DESKTOP_LIBS)						\
 	-lm
 
 plugin_in_files = 		\
@@ -128,6 +131,7 @@ test_media_window_CPPFLAGS = \
 
 test_media_window_CFLAGS = \
 	$(SETTINGS_PLUGIN_CFLAGS)	\
+	$(MATE_DESKTOP_CFLAGS)		\
 	$(AM_CFLAGS)
 
 test_media_window_LDADD = \
@@ -136,6 +140,7 @@ test_media_window_LDADD = \
 	$(SETTINGS_PLUGIN_LIBS)			\
 	$(XF86MISC_LIBS)			\
 	$(GST_LIBS)				\
+	$(MATE_DESKTOP_LIBS)			\
 	-lm
 
 test_media_keys_SOURCES =			\
@@ -158,18 +163,19 @@ test_media_keys_CPPFLAGS = \
 
 test_media_keys_CFLAGS = \
 	$(SETTINGS_PLUGIN_CFLAGS)	\
+	$(MATE_DESKTOP_CFLAGS)		\
 	$(AM_CFLAGS)
 
 test_media_keys_LDADD = \
+	$(top_builddir)/plugins/media-keys/cut-n-paste/libgvc.la        \
 	$(top_builddir)/mate-settings-daemon/libmsd-profile.la		\
 	$(top_builddir)/plugins/common/libcommon.la			\
 	$(SETTINGS_DAEMON_LIBS)			\
 	$(SETTINGS_PLUGIN_LIBS)			\
 	$(XF86MISC_LIBS)			\
 	$(GST_LIBS)				\
+	$(MATE_DESKTOP_LIBS)			\
 	-lm
-
-test_media_keys_LDADD += $(top_builddir)/plugins/media-keys/cut-n-paste/libgvc.la
 
 gtkbuilderdir = $(pkgdatadir)
 gtkbuilder_DATA =	\

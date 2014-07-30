@@ -296,7 +296,7 @@ acme_volume_open (AcmeVolume *self)
 
 	if (self->_priv->mixer != NULL) {
 		const GList *m;
-		GSList *tracks, *t;
+		GSList *tracks = NULL, *t;
 
 		/* Try to use tracks saved in GSettings 
 		   Note: errors need to be treated , for example if the user set a non type list for this key

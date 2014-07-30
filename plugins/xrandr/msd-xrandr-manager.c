@@ -1736,7 +1736,11 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
          * Yay for fucking with GTK+'s internals.
          */
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_NORMAL, TRUE);
+#else
         gtk_widget_set_state (widget, GTK_STATE_NORMAL);
+#endif
 
         return FALSE;
 }
@@ -1746,7 +1750,11 @@ static gboolean
 output_title_label_after_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
         g_assert (GTK_IS_LABEL (widget));
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_INSENSITIVE, TRUE);
+#else
         gtk_widget_set_state (widget, GTK_STATE_INSENSITIVE);
+#endif
 
         return FALSE;
 }

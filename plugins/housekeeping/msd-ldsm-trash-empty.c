@@ -296,7 +296,11 @@ trash_empty_start ()
         gtk_container_set_border_width (GTK_CONTAINER (vbox1), 6);
 
         gtk_dialog_add_button (GTK_DIALOG (trash_empty_dialog),
+#if GTK_CHECK_VERSION (3, 10, 0)
+                               _("_Cancel"),
+#else
                                GTK_STOCK_CANCEL,
+#endif
                                GTK_RESPONSE_CANCEL);
 
         markup = g_markup_printf_escaped ("<big><b>%s</b></big>", _("Emptying the trash"));
@@ -361,8 +365,13 @@ trash_empty_show_confirmation_dialog ()
                                                   "it will be permanently lost. Please note that "
                                                   "you can also delete them separately."));
 
+#if GTK_CHECK_VERSION (3, 10, 0)
+        gtk_dialog_add_button (GTK_DIALOG (trash_empty_confirm_dialog), _("_Cancel"),
+                               GTK_RESPONSE_CANCEL);
+#else
         gtk_dialog_add_button (GTK_DIALOG (trash_empty_confirm_dialog), GTK_STOCK_CANCEL,
                                GTK_RESPONSE_CANCEL);
+#endif
 
         button = gtk_button_new_with_mnemonic (_("_Empty Trash"));
         gtk_widget_show (button);
@@ -384,7 +393,7 @@ trash_empty_show_confirmation_dialog ()
 }
 
 void
-msd_ldsm_trash_empty ()
+msd_ldsm_trash_empty (void)
 {
         if (trash_empty_confirm_dialog)
                 gtk_window_present (GTK_WINDOW (trash_empty_confirm_dialog));
