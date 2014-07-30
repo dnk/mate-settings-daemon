@@ -42,7 +42,12 @@
 #include "mate-settings-manager.h"
 #include "mate-settings-profile.h"
 
+#include <libmate-desktop/mate-gsettings.h>
+
 #define MSD_DBUS_NAME         "org.mate.SettingsDaemon"
+
+#define DEBUG_KEY             "mate-settings-daemon"
+#define DEBUG_SCHEMA          "org.mate.debug"
 
 #define MATE_SESSION_DBUS_NAME      "org.mate.SessionManager"
 #define MATE_SESSION_DBUS_OBJECT    "/org/mate/SessionManager"
@@ -439,6 +444,18 @@ parse_args (int *argc, char ***argv)
             g_setenv ("G_MESSAGES_DEBUG", "all", FALSE);
 }
 
+static void debug_changed (GSettings *settings, gchar *key, gpointer user_data)
+{
+        debug = g_settings_get_boolean (settings, DEBUG_KEY);
+        if (debug) {
+            g_warning ("Enable DEBUG");
+            g_setenv ("G_MESSAGES_DEBUG", "all", FALSE);
+        } else {
+            g_warning ("Disable DEBUG");
+            g_unsetenv ("G_MESSAGES_DEBUG");
+        }
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -446,6 +463,7 @@ main (int argc, char *argv[])
         DBusGConnection      *bus;
         gboolean              res;
         GError               *error;
+        GSettings            *debug_settings = NULL;
 
         manager = NULL;
 
@@ -457,6 +475,18 @@ main (int argc, char *argv[])
         setlocale (LC_ALL, "");
 
         parse_args (&argc, &argv);
+
+        /* Allows to enable/disable debug from GSettings only if it is not set from argument */
+        if (mate_gsettings_schema_exists (DEBUG_SCHEMA))
+        {
+                debug_settings = g_settings_new (DEBUG_SCHEMA);
+                debug = g_settings_get_boolean (debug_settings, DEBUG_KEY);
+                g_signal_connect (debug_settings, "changed::" DEBUG_KEY, G_CALLBACK (debug_changed), NULL);
+
+		if (debug) {
+		    g_setenv ("G_MESSAGES_DEBUG", "all", FALSE);
+		}
+        }
 
         mate_settings_profile_start ("opening gtk display");
         if (! gtk_init_check (&argc, &argv)) {
@@ -517,6 +547,10 @@ main (int argc, char *argv[])
 
         if (manager != NULL) {
                 g_object_unref (manager);
+        }
+
+        if (debug_settings != NULL) {
+                g_object_unref (debug_settings);
         }
 
 #ifdef HAVE_LIBNOTIFY
