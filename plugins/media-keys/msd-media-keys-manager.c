@@ -544,9 +544,15 @@ do_www_action (MsdMediaKeysManager *manager)
 }
 
 static void
-do_exit_action (MsdMediaKeysManager *manager)
+do_shutdown_action (MsdMediaKeysManager *manager)
 {
         execute (manager, "mate-session-save --shutdown-dialog", FALSE, FALSE);
+}
+
+static void
+do_logout_action (MsdMediaKeysManager *manager)
+{
+        execute (manager, "mate-session-save --logout-dialog", FALSE, FALSE);
 }
 
 static void
@@ -977,8 +983,11 @@ do_action (MsdMediaKeysManager *manager,
 #endif /* HAVE_PULSE || HAVE_GSTREAMER */
                 break;
         case POWER_KEY:
-                do_exit_action (manager);
+                do_shutdown_action (manager);
                 break;
+	case LOGOUT_KEY:
+		do_logout_action (manager);
+		break;
         case EJECT_KEY:
                 do_eject_action (manager);
                 break;
