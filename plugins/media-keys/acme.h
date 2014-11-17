@@ -45,8 +45,11 @@ enum {
         STOP_KEY,
         PREVIOUS_KEY,
         NEXT_KEY,
+        MAGNIFIER_KEY,
+        SCREENREADER_KEY,
+        ON_SCREEN_KEYBOARD_KEY,
         LOGOUT_KEY,
-        HANDLED_KEYS,
+        HANDLED_KEYS
 };
 
 static struct {
@@ -73,6 +76,9 @@ static struct {
         { STOP_KEY, "stop", NULL },
         { PREVIOUS_KEY, "previous", NULL },
         { NEXT_KEY, "next", NULL },
+        { MAGNIFIER_KEY, "magnifier", NULL, NULL },
+        { SCREENREADER_KEY, "screenreader", NULL, NULL },
+        { ON_SCREEN_KEYBOARD_KEY, "on-screen-keyboard", NULL, NULL },
         { LOGOUT_KEY, "logout", NULL },
 };
 

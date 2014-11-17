@@ -35,7 +35,7 @@ int
 main (int    argc,
       char **argv)
 {
-        GError  *error;
+        GError  *error = NULL;
 
 #ifdef ENABLE_NLS
         bindtextdomain (GETTEXT_PACKAGE, MATE_SETTINGS_LOCALEDIR);
@@ -45,7 +45,6 @@ main (int    argc,
         textdomain (GETTEXT_PACKAGE);
 #endif
 
-        error = NULL;
         if (! gtk_init_with_args (&argc, &argv, NULL, NULL, NULL, &error)) {
                 fprintf (stderr, "%s", error->message);
                 g_error_free (error);
