@@ -168,7 +168,6 @@ test_media_keys_CFLAGS = \
 	$(AM_CFLAGS)
 
 test_media_keys_LDADD = \
-	$(top_builddir)/plugins/media-keys/cut-n-paste/libgvc.la        \
 	$(top_builddir)/mate-settings-daemon/libmsd-profile.la		\
 	$(top_builddir)/plugins/common/libcommon.la			\
 	$(SETTINGS_DAEMON_LIBS)			\
