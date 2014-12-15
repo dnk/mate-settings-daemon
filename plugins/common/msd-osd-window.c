@@ -55,7 +55,11 @@ struct MsdOsdWindowPrivate
 };
 
 enum {
+#if GTK_CHECK_VERSION (3, 0, 0)
+        DRAW_WHEN_COMPOSITED,
+#else
         EXPOSE_WHEN_COMPOSITED,
+#endif
         LAST_SIGNAL
 };
 
@@ -238,7 +242,7 @@ msd_osd_window_color_reverse (const GdkColor *a,
 #endif
 }
 
-/* This is our expose-event handler when the window is in a compositing manager.
+/* This is our expose/draw-event handler when the window is in a compositing manager.
  * We draw everything by hand, using Cairo, so that we can have a nice
  * transparent/rounded look.
  */
@@ -327,7 +331,11 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         cairo_set_line_width (cr, 1);
         cairo_stroke (cr);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        g_signal_emit (window, signals[DRAW_WHEN_COMPOSITED], 0, cr);
+#else
         g_signal_emit (window, signals[EXPOSE_WHEN_COMPOSITED], 0, cr);
+#endif
 
         cairo_destroy (cr);
 
@@ -348,7 +356,7 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
 #endif
 }
 
-/* This is our expose-event handler when the window is *not* in a compositing manager.
+/* This is our expose/draw-event handler when the window is *not* in a compositing manager.
  * We just draw a rectangular frame by hand.  We do this with hardcoded drawing code,
  * instead of GtkFrame, to avoid changing the window's internal widget hierarchy:  in
  * either case (composited or non-composited), callers can assume that this works
@@ -533,7 +541,7 @@ msd_osd_window_style_set (GtkWidget *widget,
 
 #if !GTK_CHECK_VERSION (3, 0, 0)
         /* We set our border width to 12 (per the MATE standard), plus the
-         * thickness of the frame that we draw in our expose handler.  This will
+         * thickness of the frame that we draw in our expose/draw handler.  This will
          * make our child be 12 pixels away from the frame.
          */
         style = gtk_widget_get_style (widget);
@@ -618,7 +626,7 @@ msd_osd_window_class_init (MsdOsdWindowClass *klass)
 #endif
 
 #if GTK_CHECK_VERSION (3, 0, 0)
-        signals[EXPOSE_WHEN_COMPOSITED] = g_signal_new ("draw-when-composited",
+        signals[DRAW_WHEN_COMPOSITED] = g_signal_new ("draw-when-composited",
 #else
         signals[EXPOSE_WHEN_COMPOSITED] = g_signal_new ("expose-when-composited",
 #endif

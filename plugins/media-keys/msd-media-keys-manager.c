@@ -48,6 +48,7 @@
 #include "eggaccelerators.h"
 #include "acme.h"
 #include "msd-media-keys-window.h"
+#include "msd-input-helper.h"
 
 #define MSD_DBUS_PATH "/org/mate/SettingsDaemon"
 #define MSD_DBUS_NAME "org.mate.SettingsDaemon"
@@ -290,6 +291,9 @@ update_kbd_cb (GSettings           *settings,
                         g_free (keys[i].key);
                         keys[i].key = NULL;
 
+                        /* We can't have a change in a hard-coded key */
+                        g_assert (keys[i].settings_key != NULL);
+
                         tmp = g_settings_get_string (settings,
                                                      keys[i].settings_key);
 
@@ -343,8 +347,11 @@ static void init_kbd(MsdMediaKeysManager* manager)
 						  manager);
 		g_free (signal_name);
 
-		tmp = g_settings_get_string (manager->priv->settings,
-			keys[i].settings_key);
+		if (keys[i].settings_key != NULL) {
+			tmp = g_settings_get_string (manager->priv->settings, keys[i].settings_key);
+		} else {
+			tmp = g_strdup (keys[i].hard_coded);
+		}
 
 		if (!is_valid_shortcut(tmp))
 		{
@@ -467,40 +474,26 @@ dialog_show (MsdMediaKeysManager *manager)
 }
 
 static void
-do_uri_action (MsdMediaKeysManager *manager, gchar *uri)
+do_url_action (MsdMediaKeysManager *manager,
+               const gchar         *scheme)
 {
         GError *error = NULL;
         GAppInfo *app_info;
 
-        app_info = g_app_info_get_default_for_uri_scheme (uri);
+        app_info = g_app_info_get_default_for_uri_scheme (scheme);
 
         if (app_info != NULL) {
            if (!g_app_info_launch (app_info, NULL, NULL, &error)) {
                 g_warning ("Could not launch '%s': %s",
                     g_app_info_get_commandline (app_info),
                     error->message);
+		g_object_unref (app_info);
                 g_error_free (error);
             }
         }
         else {
-            g_warning ("Could not find default application for '%s' scheme", uri);
+            g_warning ("Could not find default application for '%s' scheme", scheme);
         }
-}
-
-static void
-do_help_action (MsdMediaKeysManager *manager)
-{
-        GError *error = NULL;
-        if (!g_app_info_launch_default_for_uri ("http://wiki.mate-desktop.org/docs", NULL, &error)) {
-                g_warning ("Could not launch help application: %s", error->message);
-                g_error_free (error);
-        }
-}
-
-static void
-do_mail_action (MsdMediaKeysManager *manager)
-{
-        do_uri_action (manager, "mailto");
 }
 
 static void
@@ -522,12 +515,6 @@ do_media_action (MsdMediaKeysManager *manager)
         else {
             g_warning ("Could not find default application for '%s' mime-type", "audio/x-vorbis+ogg");
         }
-}
-
-static void
-do_www_action (MsdMediaKeysManager *manager)
-{
-        do_uri_action (manager, "http");
 }
 
 static void
@@ -613,6 +600,13 @@ do_touchpad_action (MsdMediaKeysManager *manager)
 {
         GSettings *settings = g_settings_new (TOUCHPAD_SCHEMA);
         gboolean state = g_settings_get_boolean (settings, TOUCHPAD_ENABLED_KEY);
+
+        if (touchpad_is_present () == FALSE) {
+                dialog_init (manager);
+                msd_media_keys_window_set_action_custom (MSD_MEDIA_KEYS_WINDOW (manager->priv->dialog),
+                                                         "touchpad-disabled", FALSE);
+                return;
+        }
 
         dialog_init (manager);
         msd_media_keys_window_set_action_custom (MSD_MEDIA_KEYS_WINDOW (manager->priv->dialog),
@@ -981,7 +975,7 @@ do_action (MsdMediaKeysManager *manager,
                 g_free (cmd);
                 break;
         case EMAIL_KEY:
-                do_mail_action (manager);
+                do_url_action (manager, "mailto");
                 break;
         case SCREENSAVER_KEY:
                 if ((cmd = g_find_program_in_path ("mate-screensaver-command"))) {
@@ -993,10 +987,10 @@ do_action (MsdMediaKeysManager *manager,
                 g_free (cmd);
                 break;
         case HELP_KEY:
-                do_help_action (manager);
+                do_url_action (manager, "help");
                 break;
         case WWW_KEY:
-                do_www_action (manager);
+                do_url_action (manager, "http");
                 break;
         case MEDIA_KEY:
                 do_media_action (manager);
@@ -1014,19 +1008,22 @@ do_action (MsdMediaKeysManager *manager,
                 break;
         case PLAY_KEY:
                 return do_multimedia_player_action (manager, "Play");
-                break;
         case PAUSE_KEY:
                 return do_multimedia_player_action (manager, "Pause");
-                break;
         case STOP_KEY:
                 return do_multimedia_player_action (manager, "Stop");
-                break;
         case PREVIOUS_KEY:
                 return do_multimedia_player_action (manager, "Previous");
-                break;
         case NEXT_KEY:
                 return do_multimedia_player_action (manager, "Next");
-                break;
+        case REWIND_KEY:
+                return do_multimedia_player_action (manager, "Rewind");
+        case FORWARD_KEY:
+                return do_multimedia_player_action (manager, "FastForward");
+        case REPEAT_KEY:
+                return do_multimedia_player_action (manager, "Repeat");
+        case RANDOM_KEY:
+                return do_multimedia_player_action (manager, "Shuffle");
         case MAGNIFIER_KEY:
                 do_magnifier_action (manager);
                 break;

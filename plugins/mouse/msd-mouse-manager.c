@@ -48,6 +48,7 @@
 
 #include "mate-settings-profile.h"
 #include "msd-mouse-manager.h"
+#include "msd-input-helper.h"
 
 #define MSD_MOUSE_MANAGER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), MSD_TYPE_MOUSE_MANAGER, MsdMouseManagerPrivate))
 
@@ -92,7 +93,6 @@ static void     msd_mouse_manager_finalize    (GObject             *object);
 static void     set_mouse_settings            (MsdMouseManager      *manager);
 #ifdef HAVE_X11_EXTENSIONS_XINPUT_H
 static int      set_tap_to_click              (gboolean state, gboolean left_handed);
-static XDevice* device_is_touchpad            (XDeviceInfo deviceinfo);
 #endif
 
 G_DEFINE_TYPE (MsdMouseManager, msd_mouse_manager, G_TYPE_OBJECT)
@@ -563,56 +563,11 @@ set_middle_button (MsdMouseManager *manager,
                 XFreeDeviceList (device_info);
 }
 
-#ifdef HAVE_X11_EXTENSIONS_XINPUT_H
-static XDevice*
-device_is_touchpad (XDeviceInfo deviceinfo)
-{
-        XDevice *device;
-        Atom realtype, prop;
-        int realformat;
-        unsigned long nitems, bytes_after;
-        unsigned char *data;
-
-        if (deviceinfo.type != XInternAtom (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), XI_TOUCHPAD, False))
-                return NULL;
-
-        prop = XInternAtom (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), "Synaptics Off", False);
-        if (!prop)
-                return NULL;
-
-        gdk_error_trap_push ();
-        device = XOpenDevice (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), deviceinfo.id);
-        if (gdk_error_trap_pop () || (device == NULL))
-                return NULL;
-
-        gdk_error_trap_push ();
-        if ((XGetDeviceProperty (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), device, prop, 0, 1, False,
-                                XA_INTEGER, &realtype, &realformat, &nitems,
-                                &bytes_after, &data) == Success) && (realtype != None)) {
-#if GTK_CHECK_VERSION (3, 0, 0)
-                gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
-                XFree (data);
-                return device;
-        }
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gdk_error_trap_pop_ignored ();
-#else
-        gdk_error_trap_pop ();
-#endif
-
-        XCloseDevice (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), device);
-        return NULL;
-}
-#endif
-
 static int
 set_disable_w_typing (MsdMouseManager *manager, gboolean state)
 {
 
-        if (state) {
+        if (state && touchpad_is_present ()) {
                 GError *error = NULL;
                 char *args[5];
 
@@ -900,7 +855,6 @@ set_locate_pointer (MsdMouseManager *manager,
         }
 }
 
-#if 0
 static void
 set_mousetweaks_daemon (MsdMouseManager *manager,
                         gboolean         dwell_enable,
@@ -963,7 +917,6 @@ set_mousetweaks_daemon (MsdMouseManager *manager,
         }
         g_free (comm);
 }
-#endif
 
 static void
 set_mouse_settings (MsdMouseManager *manager)

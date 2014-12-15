@@ -132,7 +132,7 @@ enum {
         NUMBER_OF_SIGNALS
 };
 
-static guint msd_smartcard_manager_signals[NUMBER_OF_SIGNALS];
+static guint msd_smartcard_manager_signals[NUMBER_OF_SIGNALS] = { 0 };
 
 G_DEFINE_TYPE (MsdSmartcardManager,
                msd_smartcard_manager,
@@ -1090,7 +1090,7 @@ msd_smartcard_manager_worker_watch_for_and_process_event (MsdSmartcardManagerWor
                                                           GError                    **error)
 {
         PK11SlotInfo *slot;
-        CK_SLOT_ID slot_id, *key;
+        CK_SLOT_ID slot_id, *key = NULL;
         int slot_series, card_slot_series;
         MsdSmartcard *card;
         GError *processing_error;
