@@ -14,6 +14,7 @@ AC_CONFIG_SRCDIR([mate-settings-daemon/mate-settings-manager.c])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-xz tar-ustar check-news])
+AM_MAINTAINER_MODE([enable])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
@@ -228,12 +229,7 @@ dnl ---------------------------------------------------------------------------
 dnl - Fontconfig
 dnl ---------------------------------------------------------------------------
 
-have_fontconfig=no
-PKG_CHECK_MODULES(FONTCONFIG, fontconfig,
-		  [AC_DEFINE(HAVE_FONTCONFIG, 1, [Define if Fontconfig functionality is available])
-		   have_fontconfig=yes],
-		  [have_fontconfig=no])
-AM_CONDITIONAL(HAVE_FONTCONFIG, test x"$have_fontconfig" = "xyes")
+PKG_CHECK_MODULES(FONTCONFIG, fontconfig)
 
 dnl ---------------------------------------------------------------------------
 dnl - Keyboard plugin stuff
