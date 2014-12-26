@@ -168,9 +168,6 @@ _load_file (MateSettingsManager *manager,
                 goto out;
         }
 
-        manager->priv->plugins = g_slist_prepend (manager->priv->plugins,
-                                                  g_object_ref (info));
-
         schema_name = g_strdup_printf ("%s.plugins.%s",
                                   DEFAULT_SETTINGS_PREFIX,
                                   mate_settings_plugin_info_get_location (info));
