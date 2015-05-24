@@ -263,8 +263,6 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         int              height;
 #if GTK_CHECK_VERSION (3, 0, 0)
         GtkStyleContext *style;
-        GdkRGBA          color;
-        GdkRGBA          prop_color;
 #else
         GtkStyle        *style;
         GdkColor         color;
@@ -298,38 +296,32 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         if (cairo_status (cr) != CAIRO_STATUS_SUCCESS) {
                 goto done;
         }
+#if !GTK_CHECK_VERSION (3, 0, 0)
         cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0);
         cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
         cairo_paint (cr);
+#endif
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_render_background (style, cr, 0, 0, width, height);
+#else
         /* draw a box */
         msd_osd_window_draw_rounded_rectangle (cr, 1.0, 0.5, 0.5, height / 10, width-1, height-1);
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL, GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &prop_color, NULL);
-        msd_osd_window_color_reverse (&prop_color, &color);
-        cairo_set_source_rgba (cr, color.red, color.green, color.blue, BG_ALPHA);
-#else
         msd_osd_window_color_reverse (&style->bg[GTK_STATE_NORMAL], &color);
         r = (float)color.red / 65535.0;
         g = (float)color.green / 65535.0;
         b = (float)color.blue / 65535.0;
         cairo_set_source_rgba (cr, r, g, b, BG_ALPHA);
-#endif
         cairo_fill_preserve (cr);
 
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL, GTK_STYLE_PROPERTY_COLOR, &prop_color, NULL);
-        msd_osd_window_color_reverse (&prop_color, &color);
-        cairo_set_source_rgba (cr, color.red, color.green, color.blue, BG_ALPHA / 2);
-#else
         msd_osd_window_color_reverse (&style->text_aa[GTK_STATE_NORMAL], &color);
         r = (float)color.red / 65535.0;
         g = (float)color.green / 65535.0;
         b = (float)color.blue / 65535.0;
         cairo_set_source_rgba (cr, r, g, b, BG_ALPHA / 2);
-#endif
         cairo_set_line_width (cr, 1);
         cairo_stroke (cr);
+#endif
 
 #if GTK_CHECK_VERSION (3, 0, 0)
         g_signal_emit (window, signals[DRAW_WHEN_COMPOSITED], 0, cr);
@@ -346,7 +338,6 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
 
         cairo_set_source_surface (context, surface, 0, 0);
         cairo_paint_with_alpha (context, window->priv->fade_out_alpha);
-
  done:
         if (surface != NULL) {
                 cairo_surface_destroy (surface);
@@ -600,6 +591,12 @@ msd_osd_window_constructor (GType                  type,
                       "skip-pager-hint", TRUE,
                       "focus-on-map", FALSE,
                       NULL);
+
+#if GTK_CHECK_VERSION (3, 0, 0)
+        GtkWidget *widget = GTK_WIDGET (object);
+        GtkStyleContext *style_context = gtk_widget_get_style_context (widget);
+        gtk_style_context_add_class (style_context, "osd");
+#endif
 
         return object;
 }
