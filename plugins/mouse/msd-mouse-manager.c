@@ -569,7 +569,7 @@ set_disable_w_typing (MsdMouseManager *manager, gboolean state)
 
         if (state && touchpad_is_present ()) {
                 GError *error = NULL;
-                char *args[5];
+                char *args[6];
 
                 if (manager->priv->syndaemon_spawned)
                         return 0;
@@ -578,7 +578,8 @@ set_disable_w_typing (MsdMouseManager *manager, gboolean state)
                 args[1] = "-i";
                 args[2] = "0.5";
                 args[3] = "-k";
-                args[4] = NULL;
+                args[4] = "-R";
+                args[5] = NULL;
 
                 if (!g_find_program_in_path (args[0]))
                         return 0;
