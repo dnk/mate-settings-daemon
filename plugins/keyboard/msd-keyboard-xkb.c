@@ -58,7 +58,7 @@ static GSettings* settings_kbd;
 static XklEngine* xkl_engine;
 static XklConfigRegistry* xkl_registry = NULL;
 
-static MatekbdDesktopConfig current_config;
+static MatekbdDesktopConfig current_desktop_config;
 static MatekbdKeyboardConfig current_kbd_config;
 
 /* never terminated */
@@ -143,10 +143,10 @@ apply_desktop_settings (void)
 		return;
 
 	msd_keyboard_manager_apply_settings (manager);
-	matekbd_desktop_config_load_from_gsettings (&current_config);
+	matekbd_desktop_config_load_from_gsettings (&current_desktop_config);
 	/* again, probably it would be nice to compare things
 	   before activating them */
-	matekbd_desktop_config_activate (&current_config);
+	matekbd_desktop_config_activate (&current_desktop_config);
 
 	show_leds = g_settings_get_boolean (settings_desktop, DUPLICATE_LEDS_KEY);
 	for (i = sizeof (indicator_icons) / sizeof (indicator_icons[0]);
@@ -581,15 +581,26 @@ msd_keyboard_xkb_init (MsdKeyboardManager * kbd_manager)
 		settings_desktop = g_settings_new (MATEKBD_DESKTOP_SCHEMA);
 		settings_kbd = g_settings_new (MATEKBD_KBD_SCHEMA);
 
-		matekbd_desktop_config_init (&current_config,
-					     xkl_engine);
+		matekbd_desktop_config_init (&current_desktop_config,
+		                             xkl_engine);
 		matekbd_keyboard_config_init (&current_kbd_config,
-					      xkl_engine);
+		                              xkl_engine);
+
 		xkl_engine_backup_names_prop (xkl_engine);
 		msd_keyboard_xkb_analyze_sysconfig ();
 
-		g_signal_connect (settings_desktop, "changed", G_CALLBACK(apply_desktop_settings_cb), NULL);
-		g_signal_connect (settings_kbd, "changed", G_CALLBACK(apply_xkb_settings_cb), NULL);
+		matekbd_desktop_config_start_listen (&current_desktop_config,
+		                                     G_CALLBACK (apply_desktop_settings_cb),
+		                                     NULL);
+
+		matekbd_keyboard_config_start_listen (&current_kbd_config,
+		                                      G_CALLBACK (apply_xkb_settings_cb),
+		                                      NULL);
+
+		g_signal_connect (settings_desktop, "changed",
+		                  G_CALLBACK (apply_desktop_settings_cb), NULL);
+		g_signal_connect (settings_kbd, "changed",
+		                  G_CALLBACK (apply_xkb_settings_cb), NULL);
 
 		gdk_window_add_filter (NULL, (GdkFilterFunc)
 				       msd_keyboard_xkb_evt_filter, NULL);
