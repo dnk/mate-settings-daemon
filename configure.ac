@@ -29,11 +29,17 @@ AC_SUBST(VERSION)
 
 AC_CONFIG_HEADERS([config.h])
 
-IT_PROG_INTLTOOL([0.37.1])
+IT_PROG_INTLTOOL([0.50.1])
 
 GETTEXT_PACKAGE=mate-settings-daemon
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Name of default gettext domain])
+
+# GLib min/max required versions
+AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_36],
+	[Warn on use of APIs added after GLib 2.36])
+AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_36],
+	[Warn on use of APIs deprecated before GLib 2.36])
 
 AM_GLIB_GNU_GETTEXT
 
@@ -510,6 +516,27 @@ data/Makefile
 data/mate-settings-daemon.desktop.in
 data/mate-settings-daemon.pc
 data/mate-settings-daemon-uninstalled.pc
+data/org.mate.applications-at.gschema.xml
+data/org.mate.font-rendering.gschema.xml
+data/org.mate.peripherals-smartcard.gschema.xml
+data/org.mate.peripherals-touchpad.gschema.xml
+data/org.mate.SettingsDaemon.plugins.a11y-keyboard.gschema.xml
+data/org.mate.SettingsDaemon.plugins.a11y-settings.gschema.xml
+data/org.mate.SettingsDaemon.plugins.background.gschema.xml
+data/org.mate.SettingsDaemon.plugins.clipboard.gschema.xml
+data/org.mate.SettingsDaemon.plugins.datetime.gschema.xml
+data/org.mate.SettingsDaemon.plugins.housekeeping.gschema.xml
+data/org.mate.SettingsDaemon.plugins.keybindings.gschema.xml
+data/org.mate.SettingsDaemon.plugins.keyboard.gschema.xml
+data/org.mate.SettingsDaemon.plugins.media-keys.gschema.xml
+data/org.mate.SettingsDaemon.plugins.mpris.gschema.xml
+data/org.mate.SettingsDaemon.plugins.mouse.gschema.xml
+data/org.mate.SettingsDaemon.plugins.smartcard.gschema.xml
+data/org.mate.SettingsDaemon.plugins.sound.gschema.xml
+data/org.mate.SettingsDaemon.plugins.typing-break.gschema.xml
+data/org.mate.SettingsDaemon.plugins.xrandr.gschema.xml
+data/org.mate.SettingsDaemon.plugins.xrdb.gschema.xml
+data/org.mate.SettingsDaemon.plugins.xsettings.gschema.xml
 po/Makefile.in
 ])
 
