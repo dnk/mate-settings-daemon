@@ -53,7 +53,7 @@ enum {
         SCREENREADER_KEY,
         ON_SCREEN_KEYBOARD_KEY,
         LOGOUT_KEY,
-        HANDLED_KEYS
+        HANDLED_KEYS,
 };
 
 static struct {
@@ -85,11 +85,11 @@ static struct {
         { REWIND_KEY, NULL, "XF86AudioRewind", NULL },
         { FORWARD_KEY, NULL, "XF86AudioForward", NULL },
         { REPEAT_KEY, NULL, "XF86AudioRepeat", NULL },
-        { RANDOM_KEY, NULL, "XF86AudioRandomPlay", NULL},
+        { RANDOM_KEY, NULL, "XF86AudioRandomPlay", NULL },
         { MAGNIFIER_KEY, "magnifier", NULL, NULL },
         { SCREENREADER_KEY, "screenreader", NULL, NULL },
         { ON_SCREEN_KEYBOARD_KEY, "on-screen-keyboard", NULL, NULL },
-        { LOGOUT_KEY, "logout", NULL },
+        { LOGOUT_KEY, "logout", NULL, NULL },
 };
 
 #endif /* __ACME_H__ */
