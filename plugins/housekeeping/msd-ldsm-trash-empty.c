@@ -26,6 +26,11 @@
 #define CAJA_PREFS_SCHEMA "org.mate.caja.preferences"
 #define CAJA_CONFIRM_TRASH_KEY "confirm-trash"
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+#define gtk_hbox_new(X,Y) gtk_box_new(GTK_ORIENTATION_HORIZONTAL,Y)
+#define gtk_vbox_new(X,Y) gtk_box_new(GTK_ORIENTATION_VERTICAL,Y)
+#endif
+
 /* Some of this code has been borrowed from the trash-applet, courtesy of Ryan Lortie */
 
 static GtkWidget *trash_empty_confirm_dialog = NULL;
@@ -258,20 +263,36 @@ trash_empty_start ()
 
         label1 = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (label1), TRUE);
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_halign (label1, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (label1), 0.0, 0.5);
+#endif
 
         label3 = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (label3), TRUE);
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_halign (label3, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (label3), 0.0, 0.5);
+#endif
         gtk_widget_hide (label3);
 
         location_label = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (location_label), TRUE);
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_halign (location_label, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (location_label), 0.0, 0.5);
+#endif
 
         file_label = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (file_label), TRUE);
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_halign (file_label, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (file_label), 0.0, 0.5);
+#endif
 
         progressbar = gtk_progress_bar_new ();
         gtk_progress_bar_set_pulse_step (GTK_PROGRESS_BAR (progressbar), 0.1);

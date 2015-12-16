@@ -396,7 +396,6 @@ set_server_from_settings (MsdA11yKeyboardManager *manager)
         XkbFreeKeyboard (desc, XkbAllComponentsMask, True);
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
-
 #if GTK_CHECK_VERSION (3, 0, 0)
         gdk_error_trap_pop_ignored ();
 #else
@@ -1090,7 +1089,6 @@ restore_server_xkb_config (MsdA11yKeyboardManager *manager)
                          XkbAllComponentsMask, True);
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
-
 #if GTK_CHECK_VERSION (3, 0, 0)
         gdk_error_trap_pop_ignored ();
 #else

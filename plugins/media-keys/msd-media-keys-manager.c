@@ -400,6 +400,11 @@ dialog_show (MsdMediaKeysManager *manager)
         int            screen_h;
         int            x;
         int            y;
+#if GTK_CHECK_VERSION (3, 0, 0)
+        GdkDisplay *display;
+        GdkDeviceManager *device_manager;
+        GdkDevice *pointer;
+#endif
         int            pointer_x;
         int            pointer_y;
         GtkRequisition win_req;
@@ -416,8 +421,8 @@ dialog_show (MsdMediaKeysManager *manager)
          * know its true size, yet, so we need to jump through hoops
          */
         gtk_window_get_default_size (GTK_WINDOW (manager->priv->dialog), &orig_w, &orig_h);
-#if GTK_CHECK_VERSION(3, 0, 0)
-        gtk_widget_get_preferred_size(manager->priv->dialog, NULL, &win_req);
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_widget_get_preferred_size (manager->priv->dialog, NULL, &win_req);
 #else
         gtk_widget_size_request (manager->priv->dialog, &win_req);
 #endif
@@ -430,11 +435,12 @@ dialog_show (MsdMediaKeysManager *manager)
         }
 
         pointer_screen = NULL;
-
 #if GTK_CHECK_VERSION (3, 0, 0)
-        GdkDeviceManager *device_manager = gdk_display_get_device_manager (gdk_screen_get_display (manager->priv->current_screen));
-        GdkDevice *client_pointer = gdk_device_manager_get_client_pointer (device_manager);
-        gdk_device_get_position( client_pointer,
+        display = gdk_screen_get_display (manager->priv->current_screen);
+        device_manager = gdk_display_get_device_manager (display);
+        pointer = gdk_device_manager_get_client_pointer (device_manager);
+
+        gdk_device_get_position (pointer,
                                  &pointer_screen,
                                  &pointer_x,
                                  &pointer_y);
@@ -1219,7 +1225,6 @@ msd_media_keys_manager_stop (MsdMediaKeysManager *manager)
 
         if (need_flush)
                 gdk_flush ();
-
 #if GTK_CHECK_VERSION (3, 0, 0)
         gdk_error_trap_pop_ignored ();
 #else

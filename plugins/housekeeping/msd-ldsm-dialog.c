@@ -205,13 +205,8 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
 
         /* Set up all the window stuff here */
         gtk_window_set_title (GTK_WINDOW (dialog), _("Low Disk Space"));
-#if GTK_CHECK_VERSION (3, 10, 0)
-        gtk_window_set_icon_name (GTK_WINDOW (dialog),
-                                  "gtk-dialog-warning");
-#else
-        gtk_window_set_icon_name (GTK_WINDOW (dialog),
+        gtk_window_set_icon_name (GTK_WINDOW (dialog), 
                                   GTK_STOCK_DIALOG_WARNING);
-#endif
         gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
         gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
         gtk_window_set_urgency_hint (GTK_WINDOW (dialog), TRUE);
@@ -219,23 +214,33 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 
         /* Create the image */
-#if GTK_CHECK_VERSION (3, 10, 0)
-        image = gtk_image_new_from_icon_name ("gtk-dialog-warning", GTK_ICON_SIZE_DIALOG);
-#else
         image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_DIALOG);
-#endif
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_valign (image, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
+#endif
 
         /* Create the labels */
         dialog->priv->primary_label = gtk_label_new (NULL);	
         gtk_label_set_line_wrap (GTK_LABEL (dialog->priv->primary_label), TRUE);
         gtk_label_set_single_line_mode (GTK_LABEL (dialog->priv->primary_label), FALSE);
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_halign (dialog->priv->primary_label, GTK_ALIGN_START);
+        gtk_widget_set_valign (dialog->priv->primary_label, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (dialog->priv->primary_label), 0.0, 0.0);
+#endif
 	
         dialog->priv->secondary_label = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (dialog->priv->secondary_label), TRUE);
         gtk_label_set_single_line_mode (GTK_LABEL (dialog->priv->secondary_label), FALSE);
+#if GTK_CHECK_VERSION (3, 14, 0)
+        gtk_widget_set_halign (dialog->priv->secondary_label, GTK_ALIGN_START);
+        gtk_widget_set_valign (dialog->priv->secondary_label, GTK_ALIGN_START);
+#else
         gtk_misc_set_alignment (GTK_MISC (dialog->priv->secondary_label), 0.0, 0.0);
+#endif
 
         /* Create the check button to ignore future warnings */
         dialog->priv->ignore_check_button = gtk_check_button_new ();
@@ -249,33 +254,33 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         
         /* Now set up the dialog's GtkBox's' */
         gtk_box_set_spacing (GTK_BOX (main_vbox), 14);
-
+	
 #if GTK_CHECK_VERSION(3, 0, 0)
         hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 #else
         hbox = gtk_hbox_new (FALSE, 12);
 #endif
         gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
-
+	
 #if GTK_CHECK_VERSION(3, 0, 0)
         text_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 #else
         text_vbox = gtk_vbox_new (FALSE, 12);
 #endif
-
+        
         gtk_box_pack_start (GTK_BOX (text_vbox), dialog->priv->primary_label, FALSE, FALSE, 0);
         gtk_box_pack_start (GTK_BOX (text_vbox), dialog->priv->secondary_label, TRUE, TRUE, 0);
         gtk_box_pack_start (GTK_BOX (text_vbox), dialog->priv->ignore_check_button, FALSE, FALSE, 0);
         gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 0);
         gtk_box_pack_start (GTK_BOX (hbox), text_vbox, TRUE, TRUE, 0);	
         gtk_box_pack_start (GTK_BOX (main_vbox), hbox, FALSE, FALSE, 0);
-
+						
 #if !GTK_CHECK_VERSION (3, 0, 0)
         /* Set up the action area */
         gtk_box_set_spacing (GTK_BOX (gtk_dialog_get_action_area (GTK_DIALOG (dialog))), 6);
         gtk_container_set_border_width (GTK_CONTAINER (gtk_dialog_get_action_area (GTK_DIALOG (dialog))), 5);
 #endif
-
+	
         gtk_widget_show_all (hbox);
 }
 
@@ -457,11 +462,7 @@ msd_ldsm_dialog_new (gboolean     other_usable_partitions,
                 button_empty_trash = gtk_dialog_add_button (GTK_DIALOG (dialog),
                                                             _("Empty Trash"),
                                                             MSD_LDSM_DIALOG_RESPONSE_EMPTY_TRASH);
-#if GTK_CHECK_VERSION (3, 10, 0)
-                empty_trash_image = gtk_image_new_from_icon_name ("gtk-clear", GTK_ICON_SIZE_BUTTON);
-#else
                 empty_trash_image = gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_BUTTON);
-#endif
                 gtk_button_set_image (GTK_BUTTON (button_empty_trash), empty_trash_image);
         }
 	
@@ -476,11 +477,7 @@ msd_ldsm_dialog_new (gboolean     other_usable_partitions,
         button_ignore = gtk_dialog_add_button (GTK_DIALOG (dialog), 
                                                _("Ignore"), 
                                                GTK_RESPONSE_CANCEL);
-#if GTK_CHECK_VERSION (3, 10, 0)
-        ignore_image = gtk_image_new_from_icon_name ("gtk-cancel", GTK_ICON_SIZE_BUTTON);
-#else
         ignore_image = gtk_image_new_from_stock (GTK_STOCK_CANCEL, GTK_ICON_SIZE_BUTTON);
-#endif
         gtk_button_set_image (GTK_BUTTON (button_ignore), ignore_image);
 	
         gtk_widget_grab_default (button_ignore);

@@ -204,6 +204,10 @@ timeline_frame_cb (MsdTimeline *timeline,
 {
   MsdLocatePointerData *data = (MsdLocatePointerData *) user_data;
   GdkScreen *screen;
+#if GTK_CHECK_VERSION (3, 0, 0)
+  GdkDeviceManager *device_manager;
+  GdkDevice *pointer;
+#endif
   gint cursor_x, cursor_y;
 
   if (gtk_widget_is_composited (data->widget))
@@ -221,11 +225,13 @@ timeline_frame_cb (MsdTimeline *timeline,
 
   screen = gdk_window_get_screen (data->window);
 #if GTK_CHECK_VERSION (3, 0, 0)
-  GdkDeviceManager *device_manager = gdk_display_get_device_manager (gdk_screen_get_display (screen));
-  GdkDevice *client_pointer = gdk_device_manager_get_client_pointer (device_manager);
+  device_manager = gdk_display_get_device_manager (gdk_window_get_display (gdk_screen_get_root_window (screen)));
+  pointer = gdk_device_manager_get_client_pointer (device_manager);
   gdk_window_get_device_position (gdk_screen_get_root_window (screen),
-                          client_pointer,
-			  &cursor_x, &cursor_y, NULL);
+                                  pointer,
+                                  &cursor_x,
+                                  &cursor_y,
+                                  NULL);
 #else
   gdk_window_get_pointer (gdk_screen_get_root_window (screen),
 			  &cursor_x, &cursor_y, NULL);
@@ -380,6 +386,10 @@ static void
 move_locate_pointer_window (MsdLocatePointerData *data,
 			    GdkScreen            *screen)
 {
+#if GTK_CHECK_VERSION (3, 0, 0)
+  GdkDeviceManager *device_manager;
+  GdkDevice *pointer;
+#endif
   gint cursor_x, cursor_y;
 #if !GTK_CHECK_VERSION (3, 0, 0)
   GdkBitmap *mask;
@@ -387,11 +397,13 @@ move_locate_pointer_window (MsdLocatePointerData *data,
 #endif
 
 #if GTK_CHECK_VERSION (3, 0, 0)
-  GdkDeviceManager *device_manager = gdk_display_get_device_manager (gdk_screen_get_display (screen));
-  GdkDevice *client_pointer = gdk_device_manager_get_client_pointer (device_manager);
+  device_manager = gdk_display_get_device_manager (gdk_window_get_display (gdk_screen_get_root_window (screen)));
+  pointer = gdk_device_manager_get_client_pointer (device_manager);
   gdk_window_get_device_position (gdk_screen_get_root_window (screen),
-                          client_pointer,
-			  &cursor_x, &cursor_y, NULL);
+                                  pointer,
+                                  &cursor_x,
+                                  &cursor_y,
+                                  NULL);
 #else
   gdk_window_get_pointer (gdk_screen_get_root_window (screen), &cursor_x, &cursor_y, NULL);
 #endif
