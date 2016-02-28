@@ -214,9 +214,10 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 
         /* Create the image */
-        image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_DIALOG);
-#if GTK_CHECK_VERSION (3, 14, 0)
-        gtk_widget_set_valign (image, GTK_ALIGN_START);
+        image = gtk_image_new_from_icon_name ("dialog-warning", GTK_ICON_SIZE_DIALOG);
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_widget_set_halign (image, GTK_ALIGN_START);
+        gtk_widget_set_valign (image, GTK_ALIGN_END);
 #else
         gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
 #endif
@@ -225,9 +226,9 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         dialog->priv->primary_label = gtk_label_new (NULL);	
         gtk_label_set_line_wrap (GTK_LABEL (dialog->priv->primary_label), TRUE);
         gtk_label_set_single_line_mode (GTK_LABEL (dialog->priv->primary_label), FALSE);
-#if GTK_CHECK_VERSION (3, 14, 0)
-        gtk_widget_set_halign (dialog->priv->primary_label, GTK_ALIGN_START);
-        gtk_widget_set_valign (dialog->priv->primary_label, GTK_ALIGN_START);
+#if GTK_CHECK_VERSION (3, 16, 0)
+        gtk_label_set_xalign (GTK_LABEL (dialog->priv->primary_label), 0.0);
+        gtk_label_set_yalign (GTK_LABEL (dialog->priv->primary_label), 0.0);
 #else
         gtk_misc_set_alignment (GTK_MISC (dialog->priv->primary_label), 0.0, 0.0);
 #endif
@@ -235,9 +236,9 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         dialog->priv->secondary_label = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (dialog->priv->secondary_label), TRUE);
         gtk_label_set_single_line_mode (GTK_LABEL (dialog->priv->secondary_label), FALSE);
-#if GTK_CHECK_VERSION (3, 14, 0)
-        gtk_widget_set_halign (dialog->priv->secondary_label, GTK_ALIGN_START);
-        gtk_widget_set_valign (dialog->priv->secondary_label, GTK_ALIGN_START);
+#if GTK_CHECK_VERSION (3, 16, 0)
+        gtk_label_set_xalign (GTK_LABEL (dialog->priv->secondary_label), 0.0);
+        gtk_label_set_yalign (GTK_LABEL (dialog->priv->secondary_label), 0.0);
 #else
         gtk_misc_set_alignment (GTK_MISC (dialog->priv->secondary_label), 0.0, 0.0);
 #endif
@@ -462,7 +463,7 @@ msd_ldsm_dialog_new (gboolean     other_usable_partitions,
                 button_empty_trash = gtk_dialog_add_button (GTK_DIALOG (dialog),
                                                             _("Empty Trash"),
                                                             MSD_LDSM_DIALOG_RESPONSE_EMPTY_TRASH);
-                empty_trash_image = gtk_image_new_from_stock (GTK_STOCK_CLEAR, GTK_ICON_SIZE_BUTTON);
+                empty_trash_image = gtk_image_new_from_icon_name ("edit-clear", GTK_ICON_SIZE_BUTTON);
                 gtk_button_set_image (GTK_BUTTON (button_empty_trash), empty_trash_image);
         }
 	
