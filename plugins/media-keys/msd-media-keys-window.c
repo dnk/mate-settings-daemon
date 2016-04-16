@@ -432,7 +432,7 @@ draw_volume_boxes (MsdMediaKeysWindow *window,
         msd_osd_window_draw_rounded_rectangle (cr, 1.0, _x0, _y0, height / 6, width, height);
 #if GTK_CHECK_VERSION (3, 0, 0)
 	mate_desktop_gtk_style_get_dark_color (style, GTK_STATE_FLAG_NORMAL, &color);
-        msd_osd_window_color_reverse (&color, &color);
+        cairo_set_operator (cr, CAIRO_OPERATOR_DIFFERENCE);
         cairo_set_source_rgba (cr, color.red, color.green, color.blue, MSD_OSD_WINDOW_FG_ALPHA / 2);
 #else
         msd_osd_window_color_reverse (&style->dark[GTK_STATE_NORMAL], &color);
@@ -446,7 +446,7 @@ draw_volume_boxes (MsdMediaKeysWindow *window,
         /* bar border */
 #if GTK_CHECK_VERSION (3, 0, 0)
 	mate_desktop_gtk_style_get_light_color (style, GTK_STATE_FLAG_NORMAL, &color);
-        msd_osd_window_color_reverse (&color, &color);
+        cairo_set_operator (cr, CAIRO_OPERATOR_DIFFERENCE);
         cairo_set_source_rgba (cr, color.red, color.green, color.blue, MSD_OSD_WINDOW_FG_ALPHA / 2);
 #else
         msd_osd_window_color_reverse (&style->light[GTK_STATE_NORMAL], &color);
@@ -465,7 +465,7 @@ draw_volume_boxes (MsdMediaKeysWindow *window,
         msd_osd_window_draw_rounded_rectangle (cr, 1.0, _x0 + 0.5, _y0 + 0.5, height / 6 - 0.5, x1, height - 1);
 #if GTK_CHECK_VERSION (3, 0, 0)
         gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL, GTK_STYLE_PROPERTY_COLOR, &color, NULL);
-        msd_osd_window_color_reverse (&color, &color);
+        cairo_set_operator (cr, CAIRO_OPERATOR_DIFFERENCE);
         cairo_set_source_rgba (cr, color.red, color.green, color.blue, MSD_OSD_WINDOW_FG_ALPHA);
 #else
         color = style->bg[GTK_STATE_NORMAL];

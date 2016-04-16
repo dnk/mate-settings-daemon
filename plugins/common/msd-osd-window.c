@@ -195,6 +195,7 @@ msd_osd_window_draw_rounded_rectangle (cairo_t* cr,
         cairo_close_path (cr);
 }
 
+#if !GTK_CHECK_VERSION (3, 0, 0)
 void
 msd_osd_window_color_reverse (const GdkColor *a,
                               GdkColor       *b)
@@ -224,6 +225,7 @@ msd_osd_window_color_reverse (const GdkColor *a,
         b->green = green * 65535.0;
         b->blue = blue * 65535.0;
 }
+#endif
 
 /* This is our expose/draw-event handler when the window is in a compositing manager.
  * We draw everything by hand, using Cairo, so that we can have a nice
@@ -244,9 +246,13 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         cairo_surface_t *surface;
         int              width;
         int              height;
+#if GTK_CHECK_VERSION (3, 0, 0)
+        GtkStyleContext *style;
+#else
         GtkStyle        *style;
         GdkColor         color;
         double           r, g, b;
+#endif
 
         window = MSD_OSD_WINDOW (widget);
 
@@ -254,7 +260,11 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         context = gdk_cairo_create (gtk_widget_get_window (widget));
 #endif
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        style = gtk_widget_get_style_context (widget);
+#else
         style = gtk_widget_get_style (widget);
+#endif
         cairo_set_operator (context, CAIRO_OPERATOR_SOURCE);
         gtk_window_get_size (GTK_WINDOW (widget), &width, &height);
 
@@ -271,10 +281,15 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         if (cairo_status (cr) != CAIRO_STATUS_SUCCESS) {
                 goto done;
         }
+#if !GTK_CHECK_VERSION (3, 0, 0)
         cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0);
         cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
         cairo_paint (cr);
+#endif
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+        gtk_render_background (style, cr, 0, 0, width, height);
+#else
         /* draw a box */
         msd_osd_window_draw_rounded_rectangle (cr, 1.0, 0.5, 0.5, height / 10, width-1, height-1);
         msd_osd_window_color_reverse (&style->bg[GTK_STATE_NORMAL], &color);
@@ -291,6 +306,7 @@ expose_when_composited (GtkWidget *widget, GdkEventExpose *event)
         cairo_set_source_rgba (cr, r, g, b, BG_ALPHA / 2);
         cairo_set_line_width (cr, 1);
         cairo_stroke (cr);
+#endif
 
 #if GTK_CHECK_VERSION (3, 0, 0)
         g_signal_emit (window, signals[DRAW_WHEN_COMPOSITED], 0, cr);

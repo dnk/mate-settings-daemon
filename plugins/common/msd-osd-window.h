@@ -92,10 +92,7 @@ void                  msd_osd_window_draw_rounded_rectangle (cairo_t *cr,
                                                              gdouble  width,
                                                              gdouble  height);
 
-#if GTK_CHECK_VERSION (3, 0, 0)
-void                  msd_osd_window_color_reverse          (const GdkRGBA *a,
-                                                             GdkRGBA       *b);
-#else
+#if !GTK_CHECK_VERSION (3, 0, 0)
 void                  msd_osd_window_color_reverse          (const GdkColor *a,
                                                              GdkColor       *b);
 #endif
