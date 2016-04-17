@@ -145,23 +145,6 @@ on_plugin_deactivated (MateSettingsPluginInfo *info,
         g_signal_emit (manager, signals [PLUGIN_DEACTIVATED], 0, name);
 }
 
-static gboolean
-is_item_in_schema (const char * const *items,
-                   const char         *item)
-{
-	while (*items) {
-	       if (g_strcmp0 (*items++, item) == 0)
-		       return TRUE;
-	}
-	return FALSE;
-}
-
-static gboolean
-is_schema (const char *schema)
-{
-	return is_item_in_schema (g_settings_list_schemas (), schema);
-}
-
 static void
 _load_file (MateSettingsManager *manager,
             const char           *filename)
