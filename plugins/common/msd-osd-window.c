@@ -686,6 +686,11 @@ msd_osd_window_init (MsdOsdWindow *window)
                 gtk_window_set_decorated (GTK_WINDOW (window), FALSE);
                 gtk_widget_set_app_paintable (GTK_WIDGET (window), TRUE);
 
+#if GTK_CHECK_VERSION (3, 0, 0)
+                GtkStyleContext *style = gtk_widget_get_style_context (GTK_WIDGET (window));
+                gtk_style_context_add_class (style, "window-frame");
+#endif
+
                 /* assume 130x130 on a 640x480 display and scale from there */
                 scalew = gdk_screen_get_width (screen) / 640.0;
                 scaleh = gdk_screen_get_height (screen) / 480.0;
