@@ -50,20 +50,42 @@ struct MsdLocatePointerData
 
 static MsdLocatePointerData *data = NULL;
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+static void
+msd_get_background_color (GtkStyleContext *context,
+                          GtkStateFlags    state,
+                          GdkRGBA         *color)
+{
+    GdkRGBA *c;
+
+    g_return_if_fail (color != NULL);
+    g_return_if_fail (GTK_IS_STYLE_CONTEXT (context));
+
+    gtk_style_context_get (context,
+                           state,
+                           "background-color", &c,
+                           NULL);
+    *color = *c;
+    gdk_rgba_free (c);
+}
+#endif
+
 static void
 locate_pointer_paint (MsdLocatePointerData *data,
 		      cairo_t              *cr,
 		      gboolean              composite)
 {
 #if GTK_CHECK_VERSION (3, 0, 0)
-  GdkRGBA  color;
-  GtkStyleContext *style;
-#else
-  GdkColor color;
-  GtkStyle *style;
-#endif
+  GdkRGBA color;
   gdouble progress, circle_progress;
   gint width, height, i;
+  GtkStyleContext *context;
+#else
+  GdkColor color;
+  gdouble progress, circle_progress;
+  gint width, height, i;
+  GtkStyle *style;
+#endif
 
   progress = data->progress;
 
@@ -71,8 +93,8 @@ locate_pointer_paint (MsdLocatePointerData *data,
   height = gdk_window_get_height (data->window);
 
 #if GTK_CHECK_VERSION (3, 0, 0)
-  style = gtk_widget_get_style_context (data->widget);
-  gtk_style_context_get (style, GTK_STATE_FLAG_SELECTED, GTK_STYLE_PROPERTY_BACKGROUND_COLOR, &color, NULL);
+  context = gtk_widget_get_style_context (data->widget);
+  msd_get_background_color (context, GTK_STATE_FLAG_SELECTED, &color);
 #else
   style = gtk_widget_get_style (data->widget);
   color = style->bg[GTK_STATE_SELECTED];
@@ -95,15 +117,17 @@ locate_pointer_paint (MsdLocatePointerData *data,
 
       if (composite)
 	{
-#if GTK_CHECK_VERSION (3, 0, 0)
-	  cairo_set_source_rgba (cr, color.red, color.green, color.blue, 1 - circle_progress);
-#else
 	  cairo_set_source_rgba (cr,
+#if GTK_CHECK_VERSION (3, 0, 0)
+				 color.red,
+				 color.green,
+				 color.blue,
+#else
 				 color.red / 65535.,
 				 color.green / 65535.,
 				 color.blue / 65535.,
-				 1 - circle_progress);
 #endif
+				 1 - circle_progress);
 	  cairo_arc (cr,
 		     width / 2,
 		     height / 2,
@@ -240,7 +264,7 @@ timeline_frame_cb (MsdTimeline *timeline,
                                   NULL);
 #else
   gdk_window_get_pointer (gdk_screen_get_root_window (screen),
-			  &cursor_x, &cursor_y, NULL);
+                          &cursor_x, &cursor_y, NULL);
 #endif
   gdk_window_move (data->window,
                    cursor_x - WINDOW_SIZE / 2,
