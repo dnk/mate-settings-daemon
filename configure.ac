@@ -2,7 +2,7 @@ AC_PREREQ([2.60])
 
 m4_define([msd_api_version_major],[1])
 m4_define([msd_api_version_minor],[15])
-m4_define([msd_api_version_micro],[0])
+m4_define([msd_api_version_micro],[1])
 m4_define([msd_api_version],
 	[msd_api_version_major.msd_api_version_minor.msd_api_version_micro])
 
@@ -93,6 +93,8 @@ case "$with_gtk" in
        LIBCANBERRA_PC=libcanberra-gtk3
        ;;
 esac
+
+AC_SUBST(GTK_API_VERSION)
 
 PKG_CHECK_MODULES(SETTINGS_DAEMON,
 	glib-2.0 >= $GLIB_REQUIRED_VERSION
