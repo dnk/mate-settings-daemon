@@ -22,14 +22,13 @@
 
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
-#include <gtk/gtk.h>
 
 #include <sys/types.h>
 #include <X11/Xatom.h>
 
 #include "msd-input-helper.h"
 
-static gboolean
+gboolean
 supports_xinput_devices (void)
 {
         gint op_code, event, error;
@@ -41,44 +40,49 @@ supports_xinput_devices (void)
                                 &error);
 }
 
-XDevice*
-device_is_touchpad (XDeviceInfo deviceinfo)
+static gboolean
+device_has_property (XDevice    *device,
+                     const char *property_name)
 {
-        XDevice *device;
         Atom realtype, prop;
         int realformat;
         unsigned long nitems, bytes_after;
         unsigned char *data;
 
-        if (deviceinfo.type != XInternAtom (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), XI_TOUCHPAD, False))
-                return NULL;
-
-        prop = XInternAtom (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), "Synaptics Off", False);
+        prop = XInternAtom (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), property_name, True);
         if (!prop)
-                return NULL;
-
-        gdk_error_trap_push ();
-        device = XOpenDevice (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), deviceinfo.id);
-        if (gdk_error_trap_pop () || (device == NULL))
-                return NULL;
+                return FALSE;
 
         gdk_error_trap_push ();
         if ((XGetDeviceProperty (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), device, prop, 0, 1, False,
                                 XA_INTEGER, &realtype, &realformat, &nitems,
                                 &bytes_after, &data) == Success) && (realtype != None)) {
-#if GTK_CHECK_VERSION (3, 0, 0)
                 gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
                 XFree (data);
+                return TRUE;
+        }
+
+        gdk_error_trap_pop_ignored ();
+        return FALSE;
+}
+
+XDevice*
+device_is_touchpad (XDeviceInfo *deviceinfo)
+{
+        XDevice *device;
+
+        if (deviceinfo->type != XInternAtom (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), XI_TOUCHPAD, True))
+                return NULL;
+
+        gdk_error_trap_push ();
+        device = XOpenDevice (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), deviceinfo->id);
+        if (gdk_error_trap_pop () || (device == NULL))
+                return NULL;
+
+        if (device_has_property (device, "libinput Tapping Enabled") ||
+            device_has_property (device, "Synaptics Off")) {
                 return device;
         }
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gdk_error_trap_pop_ignored ();
-#else
-        gdk_error_trap_pop ();
-#endif
 
         XCloseDevice (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), device);
         return NULL;
@@ -104,7 +108,7 @@ touchpad_is_present (void)
         for (i = 0; i < n_devices; i++) {
                 XDevice *device;
 
-                device = device_is_touchpad (device_info[i]);
+                device = device_is_touchpad (&device_info[i]);
                 if (device != NULL) {
                         retval = TRUE;
                         break;

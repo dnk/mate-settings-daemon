@@ -46,14 +46,6 @@
 #include "mate-settings-profile.h"
 #include "msd-background-manager.h"
 
-#if !GTK_CHECK_VERSION(3, 0, 0)
-#define cairo_surface_t		GdkPixmap
-#define cairo_surface_destroy	g_object_unref
-#define mate_bg_create_surface				mate_bg_create_pixmap
-#define mate_bg_set_surface_as_root			mate_bg_set_pixmap_as_root
-#define mate_bg_set_surface_as_root_with_crossfade	mate_bg_set_pixmap_as_root_with_crossfade
-#endif
-
 #define MATE_SESSION_MANAGER_DBUS_NAME "org.gnome.SessionManager"
 #define MATE_SESSION_MANAGER_DBUS_PATH "/org/gnome/SessionManager"
 
@@ -67,7 +59,7 @@ struct MsdBackgroundManagerPrivate {
 	GList           *scr_sizes;
 
 	gboolean         msd_can_draw;
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 	gboolean         caja_can_draw;
 #endif
 	gboolean         do_fade;
@@ -97,7 +89,7 @@ can_fade_bg (MsdBackgroundManager *manager)
 	return g_settings_get_boolean (manager->priv->settings, MATE_BG_KEY_BACKGROUND_FADE);
 }
 
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 /* Whether Caja is configured to draw desktop (show-desktop-icons) */
 static gboolean
 caja_can_draw_bg (MsdBackgroundManager *manager)
@@ -162,6 +154,7 @@ caja_is_drawing_bg (MsdBackgroundManager *manager)
 	return running;
 }
 #endif
+
 static void
 free_fade (MsdBackgroundManager *manager)
 {
@@ -221,7 +214,7 @@ draw_background (MsdBackgroundManager *manager,
 {
 	MsdBackgroundManagerPrivate *p = manager->priv;
 
-#if GTK_CHECK_VERSION(3, 21, 0)
+#if GTK_CHECK_VERSION(3, 22, 0)
         if (!p->msd_can_draw || p->draw_in_progress)
 		return;
 #else
@@ -274,7 +267,7 @@ on_screen_size_changed (GdkScreen            *screen,
 			MsdBackgroundManager *manager)
 {
 	MsdBackgroundManagerPrivate *p = manager->priv;
-#if GTK_CHECK_VERSION(3, 21, 0)
+#if GTK_CHECK_VERSION(3, 22, 0)
         if (!p->msd_can_draw || p->draw_in_progress)
                 return;
 #else
@@ -359,7 +352,7 @@ settings_change_event_cb (GSettings            *settings,
 
 	/* Complements on_bg_handling_changed() */
 	p->msd_can_draw = msd_can_draw_bg (manager);
-#if GTK_CHECK_VERSION(3, 21, 0)
+#if GTK_CHECK_VERSION(3, 22, 0)
 	if (p->msd_can_draw && p->bg != NULL)
 	{
 		/* Defer signal processing to avoid making the dconf backend deadlock */
@@ -430,7 +423,7 @@ on_bg_handling_changed (GSettings            *settings,
 	MsdBackgroundManagerPrivate *p = manager->priv;
 
 	mate_settings_profile_start (NULL);
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 	if (caja_is_drawing_bg (manager))
 	{
 		if (p->bg != NULL)
@@ -440,7 +433,7 @@ on_bg_handling_changed (GSettings            *settings,
 	{
 #endif
 		setup_background (manager);
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 	}
 #endif
 	mate_settings_profile_end (NULL);
@@ -497,6 +490,7 @@ on_session_manager_signal (GDBusProxy   *proxy,
 	}
 }
 
+#if !GTK_CHECK_VERSION(3, 22, 0)
 static void
 draw_bg_after_session_loads (MsdBackgroundManager *manager)
 {
@@ -525,6 +519,7 @@ draw_bg_after_session_loads (MsdBackgroundManager *manager)
 							   G_CALLBACK (on_session_manager_signal),
 							   manager);
 }
+#endif
 
 gboolean
 msd_background_manager_start (MsdBackgroundManager  *manager,
@@ -538,7 +533,7 @@ msd_background_manager_start (MsdBackgroundManager  *manager,
 	p->settings = g_settings_new (MATE_BG_SCHEMA);
 
 	p->msd_can_draw = msd_can_draw_bg (manager);
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 	p->caja_can_draw = caja_can_draw_bg (manager);
 #endif
 
@@ -553,7 +548,7 @@ msd_background_manager_start (MsdBackgroundManager  *manager,
 	 */
 	if (p->msd_can_draw)
 	{
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 		if (p->caja_can_draw)
 		{
 
@@ -563,7 +558,7 @@ msd_background_manager_start (MsdBackgroundManager  *manager,
 		{
 #endif
 			setup_background (manager);
-#if !GTK_CHECK_VERSION(3, 21, 0)
+#if !GTK_CHECK_VERSION(3, 22, 0)
 		}
 #endif
 	}

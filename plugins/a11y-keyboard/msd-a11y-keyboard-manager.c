@@ -40,11 +40,8 @@
 
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBstr.h>
-
-#ifdef HAVE_X11_EXTENSIONS_XINPUT_H
 #include <X11/extensions/XInput.h>
 #include <X11/extensions/XIproto.h>
-#endif
 
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
@@ -94,7 +91,6 @@ static gpointer manager_object = NULL;
 #define d(str)          do { } while (0)
 #endif
 
-#ifdef HAVE_X11_EXTENSIONS_XINPUT_H
 static GdkFilterReturn
 devicepresence_filter (GdkXEvent *xevent,
                        GdkEvent  *event,
@@ -154,7 +150,6 @@ set_devicepresence_handler (MsdA11yKeyboardManager *manager)
         if (!gdk_error_trap_pop ())
                 gdk_window_add_filter (NULL, devicepresence_filter, manager);
 }
-#endif
 
 static gboolean
 xkb_enabled (MsdA11yKeyboardManager *manager)
@@ -185,11 +180,7 @@ get_xkb_desc_rec (MsdA11yKeyboardManager *manager)
                 desc->ctrls = NULL;
                 status = XkbGetControls (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), XkbAllControlsMask, desc);
         }
-#if GTK_CHECK_VERSION (3, 0, 0)
         gdk_error_trap_pop_ignored ();
-#else
-        gdk_error_trap_pop ();
-#endif
 
         g_return_val_if_fail (desc != NULL, NULL);
         g_return_val_if_fail (desc->ctrls != NULL, NULL);
@@ -396,11 +387,7 @@ set_server_from_settings (MsdA11yKeyboardManager *manager)
         XkbFreeKeyboard (desc, XkbAllComponentsMask, True);
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
-#if GTK_CHECK_VERSION (3, 0, 0)
         gdk_error_trap_pop_ignored ();
-#else
-        gdk_error_trap_pop ();
-#endif
 
         mate_settings_profile_end (NULL);
 }
@@ -1022,9 +1009,7 @@ start_a11y_keyboard_idle_cb (MsdA11yKeyboardManager *manager)
         manager->priv->settings = g_settings_new (CONFIG_SCHEMA);
         g_signal_connect (manager->priv->settings, "changed", G_CALLBACK (keyboard_callback), manager);
 
-#ifdef HAVE_X11_EXTENSIONS_XINPUT_H
-	set_devicepresence_handler (manager);
-#endif
+        set_devicepresence_handler (manager);
 
         /* Save current xkb state so we can restore it on exit
          */
@@ -1089,11 +1074,7 @@ restore_server_xkb_config (MsdA11yKeyboardManager *manager)
                          XkbAllComponentsMask, True);
 
         XSync (GDK_DISPLAY_XDISPLAY(gdk_display_get_default()), FALSE);
-#if GTK_CHECK_VERSION (3, 0, 0)
         gdk_error_trap_pop_ignored ();
-#else
-        gdk_error_trap_pop ();
-#endif
 
         manager->priv->original_xkb_desc = NULL;
 }
@@ -1105,9 +1086,7 @@ msd_a11y_keyboard_manager_stop (MsdA11yKeyboardManager *manager)
 
         g_debug ("Stopping a11y_keyboard manager");
 
-#ifdef HAVE_X11_EXTENSIONS_XINPUT_H
         gdk_window_remove_filter (NULL, devicepresence_filter, manager);
-#endif
 
         if (p->status_icon)
                 gtk_status_icon_set_visible (p->status_icon, FALSE);

@@ -1679,21 +1679,12 @@ status_icon_popup_menu_selection_done_cb (GtkMenuShell *menu_shell, gpointer dat
  * to see why that "after" handler is needed.
  */
 static gboolean
-#if GTK_CHECK_VERSION (3, 0, 0)
 output_title_label_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
-#else
-output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
-#endif
 {
         MsdXrandrManager *manager = MSD_XRANDR_MANAGER (data);
         struct MsdXrandrManagerPrivate *priv = manager->priv;
         MateRROutputInfo *output;
-#if GTK_CHECK_VERSION (3, 0, 0)
         GdkRGBA color;
-#else
-        GdkColor color;
-        cairo_t *cr;
-#endif
         GtkAllocation allocation;
 
         g_assert (GTK_IS_LABEL (widget));
@@ -1704,16 +1695,7 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
         g_assert (priv->labeler != NULL);
 
         /* Draw a black rectangular border, filled with the color that corresponds to this output */
-
-#if GTK_CHECK_VERSION (3, 0, 0)
         mate_rr_labeler_get_rgba_for_output (priv->labeler, output, &color);
-#else
-        mate_rr_labeler_get_color_for_output (priv->labeler, output, &color);
-#endif
-
-#if !GTK_CHECK_VERSION (3, 0, 0)
-        cr = gdk_cairo_create (gtk_widget_get_window (widget));
-#endif
 
         cairo_set_source_rgb (cr, 0, 0, 0);
         cairo_set_line_width (cr, OUTPUT_TITLE_ITEM_BORDER);
@@ -1725,11 +1707,7 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
                          allocation.height - OUTPUT_TITLE_ITEM_BORDER);
         cairo_stroke (cr);
 
-#if GTK_CHECK_VERSION (3, 0, 0)
         gdk_cairo_set_source_rgba (cr, &color);
-#else
-        gdk_cairo_set_source_color (cr, &color);
-#endif
         cairo_rectangle (cr,
                          allocation.x + OUTPUT_TITLE_ITEM_BORDER,
                          allocation.y + OUTPUT_TITLE_ITEM_BORDER,
@@ -1749,32 +1727,17 @@ output_title_label_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gp
          * Yay for fucking with GTK+'s internals.
          */
 
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_NORMAL, TRUE);
-#else
         gtk_widget_set_state (widget, GTK_STATE_NORMAL);
-#endif
 
-#if !GTK_CHECK_VERSION (3, 0, 0)
-        cairo_destroy (cr);
-#endif
         return FALSE;
 }
 
 /* See the comment in output_title_event_box_expose_event_cb() about this funny label widget */
 static gboolean
-#if GTK_CHECK_VERSION (3, 0, 0)
 output_title_label_after_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
-#else
-output_title_label_after_expose_event_cb (GtkWidget *widget, GdkEventExpose *event, gpointer data)
-#endif
 {
         g_assert (GTK_IS_LABEL (widget));
-#if GTK_CHECK_VERSION (3, 0, 0)
-        gtk_widget_set_state_flags (widget, GTK_STATE_FLAG_INSENSITIVE, TRUE);
-#else
         gtk_widget_set_state (widget, GTK_STATE_INSENSITIVE);
-#endif
 
         return FALSE;
 }
@@ -1824,11 +1787,7 @@ make_menu_item_for_output_title (MsdXrandrManager *manager, MateRROutputInfo *ou
         GtkWidget *item;
         GtkWidget *label;
         char *str;
-#if GTK_CHECK_VERSION(3, 0, 0)
-        GdkRGBA black = { 0.0, 0.0, 0.0, 1.0 };
-#else
         GdkColor black = { 0, 0, 0, 0 };
-#endif
 
         item = gtk_menu_item_new ();
 
@@ -1844,12 +1803,7 @@ make_menu_item_for_output_title (MsdXrandrManager *manager, MateRROutputInfo *ou
          * theme's colors, since the label is always shown against a light
          * pastel background.  See bgo#556050
          */
-#if GTK_CHECK_VERSION(3, 0, 0)
-        gtk_widget_override_color (label, gtk_widget_get_state_flags (label), &black);
-#else
         gtk_widget_modify_fg (label, gtk_widget_get_state (label), &black);
-#endif
-
 
         /* Add padding around the label to fit the box that we'll draw for color-coding */
 #if GTK_CHECK_VERSION (3, 16, 0)
@@ -1868,17 +1822,10 @@ make_menu_item_for_output_title (MsdXrandrManager *manager, MateRROutputInfo *ou
          * to its expose-event signal.  See the comment in *** to see why need to connect
          * to the label both 'before' and 'after'.
          */
-#if GTK_CHECK_VERSION (3, 0, 0)
         g_signal_connect (label, "draw",
                           G_CALLBACK (output_title_label_draw_cb), manager);
         g_signal_connect_after (label, "draw",
                                 G_CALLBACK (output_title_label_after_draw_cb) , manager);
-#else
-        g_signal_connect (label, "expose-event",
-                          G_CALLBACK (output_title_label_expose_event_cb), manager);
-        g_signal_connect_after (label, "expose-event",
-                                G_CALLBACK (output_title_label_after_expose_event_cb), manager);
-#endif
 
         g_object_set_data (G_OBJECT (label), "output", output);
 
@@ -2146,7 +2093,6 @@ status_icon_popup_menu (MsdXrandrManager *manager, guint button, guint32 timesta
         g_signal_connect (priv->popup_menu, "selection-done",
                           G_CALLBACK (status_icon_popup_menu_selection_done_cb), manager);
                           
-#if GTK_CHECK_VERSION (3, 0, 0)
         /*Set up custom theming and forced transparency support*/
         GtkWidget *toplevel = gtk_widget_get_toplevel (priv->popup_menu);
         /*Fix any failures of compiz/other wm's to communicate with gtk for transparency */
@@ -2158,7 +2104,7 @@ status_icon_popup_menu (MsdXrandrManager *manager, guint button, guint32 timesta
         context = gtk_widget_get_style_context (GTK_WIDGET(toplevel));
         gtk_style_context_add_class(context,"gnome-panel-menu-bar");
         gtk_style_context_add_class(context,"mate-panel-menu-bar");
-#endif
+
         gtk_menu_popup (GTK_MENU (priv->popup_menu), NULL, NULL,
                         gtk_status_icon_position_menu,
                         priv->status_icon, button, timestamp);
@@ -2403,11 +2349,7 @@ msd_xrandr_manager_start (MsdXrandrManager *manager,
                           True, GrabModeAsync, GrabModeAsync);
 
                 gdk_flush ();
-#if GTK_CHECK_VERSION (3, 0, 0)
                 gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
         }
 
         if (manager->priv->rotate_windows_keycode) {
@@ -2419,11 +2361,7 @@ msd_xrandr_manager_start (MsdXrandrManager *manager,
                           True, GrabModeAsync, GrabModeAsync);
 
                 gdk_flush ();
-#if GTK_CHECK_VERSION (3, 0, 0)
                 gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
         }
 
         show_timestamps_dialog (manager, "Startup");
@@ -2462,11 +2400,7 @@ msd_xrandr_manager_stop (MsdXrandrManager *manager)
                             manager->priv->switch_video_mode_keycode, AnyModifier,
                             gdk_x11_get_default_root_xwindow());
 
-#if GTK_CHECK_VERSION (3, 0, 0)
                 gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
         }
 
         if (manager->priv->rotate_windows_keycode) {
@@ -2476,11 +2410,7 @@ msd_xrandr_manager_stop (MsdXrandrManager *manager)
                             manager->priv->rotate_windows_keycode, AnyModifier,
                             gdk_x11_get_default_root_xwindow());
 
-#if GTK_CHECK_VERSION (3, 0, 0)
                 gdk_error_trap_pop_ignored ();
-#else
-                gdk_error_trap_pop ();
-#endif
         }
 
         gdk_window_remove_filter (gdk_get_default_root_window (),

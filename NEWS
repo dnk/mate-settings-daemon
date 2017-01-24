@@ -1,32 +1,81 @@
-1.15.1
+### mate-settings-daemon 1.17.1
+
+  * mouse: fix applying "disable while typing" setting to all devices
+  * mouse: libinput - hook up disable while typing
+  * mouse: libinput - hook up acceleration setting
+  * mouse: call only Synaptics function from set_left_handed_legacy_driver
+  * mouse: libinput - hook up left-handed setting
+  * mouse: added helper to check if property exists on device
+  * mouse: libinput - hook up click methods
+  * mouse: libinput - hook up scrolling settings
+  * mouse: libinput - hook up tapping configuration
+  * mouse: libinput - hook up middle button emulation
+  * mouse: libinput - hook up natural scroll configuration
+  * common: recognize libinput touchpads as touchpads
+  * OSD: Add style class for noncomposited case
+  * OSD: fix rendering on noncomposited desktop
+  * mouse: move bool property helpers closer to the top
+  * mouse: split helper for setting bool property into two separate ones
+  * reorganize helpers for setting touchpad scrolling
+  * mouse: remove unused argument from some functions
+  * po: actually add new language from Transifex
+
+### mate-settings-daemon 1.17.0
 
   * Translations update
-  * sync with transiflex
-  * GTK 3.21: Fix background changing, startup delay
-  * GTK 3.21: Fix caja startup background
-  * distcheck: explicitly use currently selected GTK+ version
-  * media-keys: bring back support for mate-calc
-  * media-keys: support gnome-calculator, drop support for mate-calc
-  * housekeeping: replace buggy thumb-cleaning code with correct one
+  * move to GTK+3 (>= 3.14), drop GTK+2 code and --with-gtk build option
+  * background: add missing GTK+ version check to avoid build warning
+  * background: check for stable release of GTK+3, not for development one
+  * build: require libmatemixer >= 1.10 (first stable release)
+  * build: require libxklavier >= 5.2
+  * remove extra glib version check from build conf
+  * build: require dconf >= 0.13
+  * fix description of motion-acceleration key in touchpad schema
+  * mouse: implement separate mouse/touchpad motion settings using XInput
+  * mouse: add separate keys for touchpad motion settings (not used yet)
+  * mouse: use same #define for 'left-handed' key of mouse and touchpad
+  * mouse: make separate callback for processing touchpad settings
+  * mouse: use more common g_strcmp0 function instead of g_str_equal
+  * mouse: add key for separate touchpad handedness (left/right-handed)
+  * schema: fix indent a bit
+  * mouse: add helper function for fetching Atom property
+  * common: don't create Atom property when checking for its presence
+  * mouse: a bit more of refactoring, less push/pop calls
+  * mouse: move setting left-handed for one device to new function
+  * mouse: move setting tap to click for one device to new function
+  * mouse: move enabling/disabling one touchpad to new function
+  * mouse: move setting bool property for one device to new function
+  * mouse: move setting click actions for one device to new function
+  * mouse: move setting natural scroll for one device to new function
+  * mouse: don't copy struct when it's not needed, pass pointer instead
+  * mouse: move setting middle button for one device to new function
+  * mouse: don't create duplicate GSettings instance
+  * mouse: don't apply any settings if XInput isn't present
+  * mouse: remove duplicate function
+  * build: require XInput unconditionally
+  * xrandr: use proper libmate-desktop function in GTK+3 build
 
-1.15.0
+### mate-settings-daemon 1.16.0
 
-  * Translations update
-  * mpris: fix a couple of build warnings
-  * fix build warning -Wdiscarded-qualifiers
-  * GTK+3 mouse: fix deprecated gtk_style_context_get_background_color
-  * GTK+3 msd-locate-pointer: port to GtkStyleContext
-  * GTK+3 media-keys: progressbar themed background
-  * GTK+3 media-keys: add style class OSD for MsdOsdWindow
-  * GTK+3 media-keys: do not use hardcoded colors for osd progressbar
-  * GTK+3 media-keys: Port OSD to GtkStyleContext
-  * GTK+3 media-keys: setup css class name for MsdOsdWindow
-  * GTK+3 media-keys: css themes for MsdOsdWindow
   * Change default hinting style to 'hintslight'
   * Use 'rgba' (LCD subpixel) antialiasing by default
-  * housekeeping: properly apply label markup
+  * GTK+3: add css theming for OSD (MsdOsdWindow) instead of using
+    hardcoded colors
+  * GTK+3: fix drawing and changing of desktop background with 3.21
+  * GTK+3: fix several deprecations
+  * Fix some build warnings
+  * Translations update
 
-1.14.0
+### mate-settings-daemon 1.14.1
+
+  * housekeeping: fix thumbnails cleaning
+  * housekeeping: fix text markup
+  * media-keys: use gnome-calculator binary instead of old gcalctool
+  * Translations update
+  * Make distcheck use currently selected GTK+ version
+
+### mate-settings-daemon 1.14.0
+
   * Drop MateConf migration script
   * media-keys: add setting to enable/disable OSD
   * touchpad: support edge and two-finger scrolling independently
@@ -37,12 +86,14 @@
   * Translations update
   * Fix Changelog generation
 
-1.12.1
+### mate-settings-daemon 1.12.1
+
   * xrandr: install icon in correct directory
   * GTK+3: don't remove xrandr applet background (fixes invisible
     text in some themes)
 
-1.12.0
+### mate-settings-daemon 1.12.0
+
   * Add new keybinding for logout (empty by default)
   * Retrieve strings directly from gschema (requires intltool 0.50.1)
   * Switch to org.gnome.SessionManager
@@ -52,26 +103,31 @@
   * GTK+3: make xrandr tray applet support custom panel themes
   * Some more fixes and cleanups
 
-1.10.2
+### mate-settings-daemon 1.10.2
+
   * a11y: don't use ancient properties
   * housekeeping: don’t monitor fdescfs (special FS in FreeBSD)
   * keyboard: connect to libmatekbd's GSettings before reading them
   * mouse: use event driven mode for syndaemon, save some power
 
-1.10.1
+### mate-settings-daemon 1.10.1
+
   * Fix media keys issue with multiple players
   * Add some missing manpages
   * Translations update
 
-1.10.0
+### mate-settings-daemon 1.10.0
+
   * Port media-keys plugin to libmatemixer
   * Remove GStreamer bits, make libmatemixer, libcanberra and PulseAudio
     optional dependencies
   * Adapt to mate-desktop MateRR* API changes. Thanks to monsta for testing.
 
-1.8.0
+### mate-settings-daemon 1.8.0
+
   * Add GTK3 support
   * Add Middle Click Emulation to mouse manager
 
-1.6.0
+### mate-settings-daemon 1.6.0
+
   * Migration to gsettings
