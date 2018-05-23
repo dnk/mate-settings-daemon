@@ -399,7 +399,6 @@ ax_response_callback (MsdA11yKeyboardManager *manager,
                       guint                   revert_controls_mask,
                       gboolean                enabled)
 {
-        GdkScreen *screen;
         GError *err;
 
         switch (response_id) {
@@ -424,14 +423,9 @@ ax_response_callback (MsdA11yKeyboardManager *manager,
                 break;
 
         case GTK_RESPONSE_HELP:
-                if (!parent)
-                        screen = gdk_screen_get_default ();
-                else
-                        screen = gtk_widget_get_screen (GTK_WIDGET (parent));
-
                 err = NULL;
-                if (!gtk_show_uri (screen,
-                                   "help:user-guide#goscustaccess-6",
+                if (!gtk_show_uri_on_window (parent,
+                                   "help:mate-user-guide/goscustaccess-6",
                                    gtk_get_current_event_time(),
                                    &err)) {
                         GtkWidget *error_dialog = gtk_message_dialog_new (parent,

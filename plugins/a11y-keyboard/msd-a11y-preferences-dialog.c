@@ -29,6 +29,7 @@
 #include <glib/gi18n.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h>
 
 #include <dbus/dbus-glib.h>
 
@@ -172,16 +173,19 @@ get_dpi_from_x_server (void)
 {
         GdkScreen *screen;
         double     dpi;
+        int        scale;
 
         screen = gdk_screen_get_default ();
         if (screen != NULL) {
                 double width_dpi;
                 double height_dpi;
 
-                width_dpi = dpi_from_pixels_and_mm (gdk_screen_get_width (screen),
-                                                    gdk_screen_get_width_mm (screen));
-                height_dpi = dpi_from_pixels_and_mm (gdk_screen_get_height (screen),
-                                                     gdk_screen_get_height_mm (screen));
+                Screen *xscreen = gdk_x11_screen_get_xscreen (screen);
+
+                scale = gdk_window_get_scale_factor (gdk_screen_get_root_window (screen));
+                width_dpi = dpi_from_pixels_and_mm (WidthOfScreen (xscreen), WidthMMOfScreen (xscreen));
+                height_dpi = dpi_from_pixels_and_mm (HeightOfScreen (xscreen), HeightMMOfScreen (xscreen));
+
                 if (width_dpi < DPI_LOW_REASONABLE_VALUE
                     || width_dpi > DPI_HIGH_REASONABLE_VALUE
                     || height_dpi < DPI_LOW_REASONABLE_VALUE
@@ -190,6 +194,9 @@ get_dpi_from_x_server (void)
                 } else {
                         dpi = (width_dpi + height_dpi) / 2.0;
                 }
+
+                dpi *= scale;
+
         } else {
                 /* Huh!?  No screen? */
                 dpi = DPI_DEFAULT;

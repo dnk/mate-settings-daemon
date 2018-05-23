@@ -206,7 +206,7 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         /* Set up all the window stuff here */
         gtk_window_set_title (GTK_WINDOW (dialog), _("Low Disk Space"));
         gtk_window_set_icon_name (GTK_WINDOW (dialog), 
-                                  GTK_STOCK_DIALOG_WARNING);
+                                  "dialog-warning");
         gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
         gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
         gtk_window_set_urgency_hint (GTK_WINDOW (dialog), TRUE);
@@ -222,22 +222,16 @@ msd_ldsm_dialog_init (MsdLdsmDialog *dialog)
         dialog->priv->primary_label = gtk_label_new (NULL);	
         gtk_label_set_line_wrap (GTK_LABEL (dialog->priv->primary_label), TRUE);
         gtk_label_set_single_line_mode (GTK_LABEL (dialog->priv->primary_label), FALSE);
-#if GTK_CHECK_VERSION (3, 16, 0)
+        gtk_label_set_max_width_chars (GTK_LABEL (dialog->priv->primary_label), 70);
         gtk_label_set_xalign (GTK_LABEL (dialog->priv->primary_label), 0.0);
         gtk_label_set_yalign (GTK_LABEL (dialog->priv->primary_label), 0.0);
-#else
-        gtk_misc_set_alignment (GTK_MISC (dialog->priv->primary_label), 0.0, 0.0);
-#endif
 	
         dialog->priv->secondary_label = gtk_label_new (NULL);
         gtk_label_set_line_wrap (GTK_LABEL (dialog->priv->secondary_label), TRUE);
         gtk_label_set_single_line_mode (GTK_LABEL (dialog->priv->secondary_label), FALSE);
-#if GTK_CHECK_VERSION (3, 16, 0)
+        gtk_label_set_max_width_chars (GTK_LABEL (dialog->priv->secondary_label), 70);
         gtk_label_set_xalign (GTK_LABEL (dialog->priv->secondary_label), 0.0);
         gtk_label_set_yalign (GTK_LABEL (dialog->priv->secondary_label), 0.0);
-#else
-        gtk_misc_set_alignment (GTK_MISC (dialog->priv->secondary_label), 0.0, 0.0);
-#endif
 
         /* Create the check button to ignore future warnings */
         dialog->priv->ignore_check_button = gtk_check_button_new ();

@@ -1671,13 +1671,6 @@ status_icon_popup_menu_selection_done_cb (GtkMenuShell *menu_shell, gpointer dat
 
 #define OUTPUT_TITLE_ITEM_BORDER 2
 #define OUTPUT_TITLE_ITEM_PADDING 4
-
-/* This is an expose-event hander for the title label for each MateRROutput.
- * We want each title to have a colored background, so we paint that background, then
- * return FALSE to let GtkLabel expose itself (i.e. paint the label's text), and then
- * we have a signal_connect_after handler as well.  See the comments below
- * to see why that "after" handler is needed.
- */
 static gboolean
 output_title_label_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
 {
@@ -1685,59 +1678,37 @@ output_title_label_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
         struct MsdXrandrManagerPrivate *priv = manager->priv;
         MateRROutputInfo *output;
         GdkRGBA color;
-        GtkAllocation allocation;
-
-        g_assert (GTK_IS_LABEL (widget));
+        GString *string;
+        gchar *css, *color_string;
+        GtkStyleContext *context;
+        GtkCssProvider  *provider;
 
         output = g_object_get_data (G_OBJECT (widget), "output");
-        g_assert (output != NULL);
 
-        g_assert (priv->labeler != NULL);
-
-        /* Draw a black rectangular border, filled with the color that corresponds to this output */
         mate_rr_labeler_get_rgba_for_output (priv->labeler, output, &color);
 
-        cairo_set_source_rgb (cr, 0, 0, 0);
-        cairo_set_line_width (cr, OUTPUT_TITLE_ITEM_BORDER);
-        gtk_widget_get_allocation (widget, &allocation);
-        cairo_rectangle (cr,
-                         allocation.x + OUTPUT_TITLE_ITEM_BORDER / 2.0,
-                         allocation.y + OUTPUT_TITLE_ITEM_BORDER / 2.0,
-                         allocation.width - OUTPUT_TITLE_ITEM_BORDER,
-                         allocation.height - OUTPUT_TITLE_ITEM_BORDER);
-        cairo_stroke (cr);
+        color_string = gdk_rgba_to_string (&color);
 
-        gdk_cairo_set_source_rgba (cr, &color);
-        cairo_rectangle (cr,
-                         allocation.x + OUTPUT_TITLE_ITEM_BORDER,
-                         allocation.y + OUTPUT_TITLE_ITEM_BORDER,
-                         allocation.width - 2 * OUTPUT_TITLE_ITEM_BORDER,
-                         allocation.height - 2 * OUTPUT_TITLE_ITEM_BORDER);
+        /*This can be overriden by themes, check all label:insensitive entries if it does not show up*/
+        string = g_string_new(NULL);
+        g_string_append (string, ".mate-panel-menu-bar menuitem.xrandr-applet:disabled>box>label{\n");
+        /* g_string_append (string, "color: black;"); Does not work-overridden in all themes*/
+        g_string_append (string, "padding-left: 4px; padding-right: 4px;");
+        g_string_append (string, "border-color: gray;");
+        g_string_append (string, "background-color:");
+        g_string_append (string, color_string);
+        g_string_append (string," }");
 
-        cairo_fill (cr);
+        css = g_string_free (string, FALSE);
 
-        /* We want the label to always show up as if it were sensitive
-         * ("style->fg[GTK_STATE_NORMAL]"), even though the label is insensitive
-         * due to being inside an insensitive menu item.  So, here we have a
-         * HACK in which we frob the label's state directly.  GtkLabel's expose
-         * handler will be run after this function, so it will think that the
-         * label is in GTK_STATE_NORMAL.  We reset the label's state back to
-         * insensitive in output_title_label_after_expose_event_cb().
-         *
-         * Yay for fucking with GTK+'s internals.
-         */
+        context = gtk_widget_get_style_context (widget);
+        provider = gtk_css_provider_new ();
+        gtk_css_provider_load_from_data (provider,css, -1, NULL);
 
-        gtk_widget_set_state (widget, GTK_STATE_NORMAL);
-
-        return FALSE;
-}
-
-/* See the comment in output_title_event_box_expose_event_cb() about this funny label widget */
-static gboolean
-output_title_label_after_draw_cb (GtkWidget *widget, cairo_t *cr, gpointer data)
-{
-        g_assert (GTK_IS_LABEL (widget));
-        gtk_widget_set_state (widget, GTK_STATE_INSENSITIVE);
+        gtk_style_context_add_provider (context,
+					GTK_STYLE_PROVIDER (provider),
+					GTK_STYLE_PROVIDER_PRIORITY_FALLBACK);
+	    g_object_unref (provider);
 
         return FALSE;
 }
@@ -1784,12 +1755,46 @@ title_item_size_allocate_cb (GtkWidget *widget, GtkAllocation *allocation, gpoin
 static GtkWidget *
 make_menu_item_for_output_title (MsdXrandrManager *manager, MateRROutputInfo *output)
 {
-        GtkWidget *item;
-        GtkWidget *label;
+        GtkWidget       *item;
+        GtkStyleContext *context;
+        GtkCssProvider  *provider;
+        GtkWidget       *label;
+        GtkWidget       *image;
+        GtkWidget *box;
         char *str;
-        GdkColor black = { 0, 0, 0, 0 };
 
         item = gtk_menu_item_new ();
+        box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+        image = gtk_image_new_from_icon_name ("computer", GTK_ICON_SIZE_MENU);
+        context = gtk_widget_get_style_context (item);
+        gtk_style_context_add_class (context, "xrandr-applet");
+
+        /*This is NOT overrridden by themes as FALLBACK won't work here
+         *
+         *Disable dim/opacity effects applied to icons in an insensitive menu item
+         *And apply the final label border width and style here
+         *(style required too because "none" will define zero width)
+         *before the draw call so label width is defined here
+         *Draw call is too late and will cause scrollbars to appear from
+         *delayed expansion of the label
+         */
+
+        provider = gtk_css_provider_new ();
+        gtk_css_provider_load_from_data (provider,
+            ".mate-panel-menu-bar menuitem.xrandr-applet:disabled>box>image{\n"
+             "opacity: 1.0; \n"
+             "-gtk-icon-effect: none; \n"
+             "}"
+             ".mate-panel-menu-bar menuitem.xrandr-applet:disabled>box>label{\n"
+             "border-width: 1px;"
+             "border-style: inset;"
+             "}",
+             -1, NULL);
+        /*Need to handle both the image and the label, so has to be for screen to work*/
+        gtk_style_context_add_provider_for_screen (gdk_screen_get_default(),
+					GTK_STYLE_PROVIDER (provider),
+					GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	    g_object_unref (provider);
 
         g_signal_connect (item, "size-allocate",
                           G_CALLBACK (title_item_size_allocate_cb), NULL);
@@ -1799,37 +1804,25 @@ make_menu_item_for_output_title (MsdXrandrManager *manager, MateRROutputInfo *ou
         gtk_label_set_markup (GTK_LABEL (label), str);
         g_free (str);
 
-        /* Make the label explicitly black.  We don't want it to follow the
-         * theme's colors, since the label is always shown against a light
-         * pastel background.  See bgo#556050
-         */
-        gtk_widget_modify_fg (label, gtk_widget_get_state (label), &black);
-
         /* Add padding around the label to fit the box that we'll draw for color-coding */
-#if GTK_CHECK_VERSION (3, 16, 0)
         gtk_label_set_xalign (GTK_LABEL (label), 0.0);
         gtk_label_set_yalign (GTK_LABEL (label), 0.5);
-#else
-        gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-#endif
-        gtk_misc_set_padding (GTK_MISC (label),
-                              OUTPUT_TITLE_ITEM_BORDER + OUTPUT_TITLE_ITEM_PADDING,
-                              OUTPUT_TITLE_ITEM_BORDER + OUTPUT_TITLE_ITEM_PADDING);
+        gtk_widget_set_margin_start (label, OUTPUT_TITLE_ITEM_BORDER + OUTPUT_TITLE_ITEM_PADDING);
+        gtk_widget_set_margin_end (label, OUTPUT_TITLE_ITEM_BORDER + OUTPUT_TITLE_ITEM_PADDING);
+        gtk_widget_set_margin_top (label, OUTPUT_TITLE_ITEM_BORDER + OUTPUT_TITLE_ITEM_PADDING);
+        gtk_widget_set_margin_bottom (label, OUTPUT_TITLE_ITEM_BORDER + OUTPUT_TITLE_ITEM_PADDING);
 
-        gtk_container_add (GTK_CONTAINER (item), label);
+        gtk_container_add (GTK_CONTAINER (box), image);
+        gtk_container_add (GTK_CONTAINER (box), label);
+        gtk_container_add (GTK_CONTAINER (item), box);
 
-        /* We want to paint a colored box as the background of the label, so we connect
-         * to its expose-event signal.  See the comment in *** to see why need to connect
-         * to the label both 'before' and 'after'.
-         */
         g_signal_connect (label, "draw",
                           G_CALLBACK (output_title_label_draw_cb), manager);
-        g_signal_connect_after (label, "draw",
-                                G_CALLBACK (output_title_label_after_draw_cb) , manager);
 
         g_object_set_data (G_OBJECT (label), "output", output);
 
         gtk_widget_set_sensitive (item, FALSE); /* the title is not selectable */
+
         gtk_widget_show_all (item);
 
         return item;

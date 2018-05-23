@@ -887,8 +887,8 @@ system_timezone_is_zone_file_valid (const char  *zone_file,
         channel = g_io_channel_new_file (zone_file, "r", &our_error);
         if (!our_error)
                 g_io_channel_read_chars (channel,
-                                                  buffer, strlen (TZ_MAGIC),
-                                                  &read, &our_error);
+                                         buffer, strlen (TZ_MAGIC),
+                                         &read, &our_error);
         if (channel)
                 g_io_channel_unref (channel);
 

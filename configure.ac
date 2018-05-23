@@ -1,8 +1,8 @@
 AC_PREREQ([2.60])
 
 m4_define([msd_api_version_major],[1])
-m4_define([msd_api_version_minor],[17])
-m4_define([msd_api_version_micro],[1])
+m4_define([msd_api_version_minor],[20])
+m4_define([msd_api_version_micro],[0])
 m4_define([msd_api_version],
 	[msd_api_version_major.msd_api_version_minor.msd_api_version_micro])
 
@@ -35,12 +35,6 @@ GETTEXT_PACKAGE=mate-settings-daemon
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Name of default gettext domain])
 
-# GLib min/max required versions
-AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_36],
-	[Warn on use of APIs added after GLib 2.36])
-AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_36],
-	[Warn on use of APIs deprecated before GLib 2.36])
-
 AM_GLIB_GNU_GETTEXT
 
 AS_AC_EXPAND(LIBEXECDIR, "$libexecdir")
@@ -57,10 +51,10 @@ dnl - Dependencies
 dnl ---------------------------------------------------------------------------
 
 DBUS_GLIB_REQUIRED_VERSION=0.74
-GLIB_REQUIRED_VERSION=2.36.0
-GIO_REQUIRED_VERSION=2.26.0
-GTK_REQUIRED_VERSION=3.14.0
-MATE_DESKTOP_REQUIRED_VERSION=1.17.0
+GLIB_REQUIRED_VERSION=2.50.0
+GIO_REQUIRED_VERSION=2.50.0
+GTK_REQUIRED_VERSION=3.22.0
+MATE_DESKTOP_REQUIRED_VERSION=1.20.0
 LIBMATEKBD_REQUIRED_VERSION=1.17.0
 LIBNOTIFY_REQUIRED_VERSION=0.7.0
 LIBMATEMIXER_REQUIRED_VERSION=1.10.0
@@ -492,6 +486,7 @@ data/org.mate.SettingsDaemon.plugins.typing-break.gschema.xml
 data/org.mate.SettingsDaemon.plugins.xrandr.gschema.xml
 data/org.mate.SettingsDaemon.plugins.xrdb.gschema.xml
 data/org.mate.SettingsDaemon.plugins.xsettings.gschema.xml
+data/org.mate.SettingsDaemon.plugins.gschema.xml
 po/Makefile.in
 ])
 

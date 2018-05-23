@@ -107,21 +107,14 @@ static void
 init_screens (MsdMediaKeysManager *manager)
 {
         GdkDisplay *display;
-        int i;
-#if GTK_CHECK_VERSION(3, 0, 0)
-        gint n_screens = 1;
-#else
-        gint n_screens = gdk_display_get_n_screens (display);
-#endif
 
         display = gdk_display_get_default ();
-        for (i = 0; i < n_screens; i++) {
-                GdkScreen *screen;
 
-                screen = gdk_display_get_screen (display, i);
-                if (screen == NULL) {
-                        continue;
-                }
+        GdkScreen *screen;
+
+        screen = gdk_display_get_default_screen (display);
+
+        if (screen != NULL) {
                 manager->priv->screens = g_slist_append (manager->priv->screens, screen);
         }
 
@@ -271,11 +264,13 @@ update_kbd_cb (GSettings           *settings,
                MsdMediaKeysManager *manager)
 {
         int      i;
+        GdkDisplay *dpy;
         gboolean need_flush = TRUE;
 
         g_return_if_fail (settings_key != NULL);
 
-        gdk_error_trap_push ();
+        dpy = gdk_display_get_default ();
+        gdk_x11_display_error_trap_push (dpy);
 
         /* Find the key that was modified */
         for (i = 0; i < HANDLED_KEYS; i++) {
@@ -320,19 +315,21 @@ update_kbd_cb (GSettings           *settings,
         }
 
         if (need_flush)
-                gdk_flush ();
-        if (gdk_error_trap_pop ())
+                gdk_display_flush (dpy);
+        if (gdk_x11_display_error_trap_pop (dpy))
                 g_warning ("Grab failed for some keys, another application may already have access the them.");
 }
 
 static void init_kbd(MsdMediaKeysManager* manager)
 {
 	int i;
+	GdkDisplay *dpy;
 	gboolean need_flush = FALSE;
 
 	mate_settings_profile_start(NULL);
 
-	gdk_error_trap_push();
+	dpy = gdk_display_get_default ();
+	gdk_x11_display_error_trap_push (dpy);
 
 	for (i = 0; i < HANDLED_KEYS; i++)
 	{
@@ -380,10 +377,10 @@ static void init_kbd(MsdMediaKeysManager* manager)
 
 	if (need_flush)
 	{
-		gdk_flush();
+		gdk_display_flush (dpy);
 	}
 
-	if (gdk_error_trap_pop ())
+	if (gdk_x11_display_error_trap_pop (dpy))
 	{
 		g_warning("Grab failed for some keys, another application may already have access the them.");
 	}
@@ -408,7 +405,7 @@ dialog_show (MsdMediaKeysManager *manager)
         GtkRequisition win_req;
         GdkScreen     *pointer_screen;
         GdkRectangle   geometry;
-        int            monitor;
+        GdkMonitor    *monitor;
 
         gtk_window_set_screen (GTK_WINDOW (manager->priv->dialog),
                                manager->priv->current_screen);
@@ -446,16 +443,12 @@ dialog_show (MsdMediaKeysManager *manager)
                 /* The pointer isn't on the current screen, so just
                  * assume the default monitor
                  */
-                monitor = 0;
+                monitor = gdk_display_get_monitor (display, 0);
         } else {
-                monitor = gdk_screen_get_monitor_at_point (manager->priv->current_screen,
-                                                           pointer_x,
-                                                           pointer_y);
+                monitor = gdk_display_get_monitor_at_point (display, pointer_x, pointer_y);
         }
 
-        gdk_screen_get_monitor_geometry (manager->priv->current_screen,
-                                         monitor,
-                                         &geometry);
+        gdk_monitor_get_geometry (monitor, &geometry);
 
         screen_w = geometry.width;
         screen_h = geometry.height;
@@ -1068,7 +1061,7 @@ acme_filter_events (GdkXEvent           *xevent,
         int        i;
 
         /* verify we have a key event */
-        if (xev->type != KeyPress && xev->type != KeyRelease) {
+        if (xev->type != KeyPress) {
                 return GDK_FILTER_CONTINUE;
         }
 
@@ -1082,10 +1075,6 @@ acme_filter_events (GdkXEvent           *xevent,
                                         return GDK_FILTER_CONTINUE;
                                 }
                                 break;
-                        default:
-                                if (xev->type != KeyRelease) {
-                                        return GDK_FILTER_CONTINUE;
-                                }
                         }
 
                         manager->priv->current_screen = acme_get_screen_from_event (manager, xany);
@@ -1105,9 +1094,15 @@ static gboolean
 start_media_keys_idle_cb (MsdMediaKeysManager *manager)
 {
         GSList *l;
+        GdkDisplay *dpy;
+        Display *xdpy;
 
         g_debug ("Starting media_keys manager");
         mate_settings_profile_start (NULL);
+
+        dpy = gdk_display_get_default ();
+        xdpy = GDK_DISPLAY_XDISPLAY (dpy);
+
         manager->priv->volume_monitor = g_volume_monitor_get ();
         manager->priv->settings = g_settings_new (BINDING_SCHEMA);
 
@@ -1116,14 +1111,28 @@ start_media_keys_idle_cb (MsdMediaKeysManager *manager)
 
         /* Start filtering the events */
         for (l = manager->priv->screens; l != NULL; l = l->next) {
+                GdkWindow *window;
+                Window xwindow;
+                XWindowAttributes atts;
+
                 mate_settings_profile_start ("gdk_window_add_filter");
 
-                g_debug ("adding key filter for screen: %d",
-                         gdk_screen_get_number (l->data));
+                window = gdk_screen_get_root_window (l->data);
+                xwindow = GDK_WINDOW_XID (window);
 
-                gdk_window_add_filter (gdk_screen_get_root_window (l->data),
+                g_debug ("adding key filter for screen: %d",
+                         gdk_x11_screen_get_screen_number (l->data));
+
+                gdk_window_add_filter (window,
                                        (GdkFilterFunc)acme_filter_events,
                                        manager);
+
+                gdk_x11_display_error_trap_push (dpy);
+                /* Add KeyPressMask to the currently reportable event masks */
+                XGetWindowAttributes (xdpy, xwindow, &atts);
+                XSelectInput (xdpy, xwindow, atts.your_event_mask | KeyPressMask);
+                gdk_x11_display_error_trap_pop_ignored (dpy);
+
                 mate_settings_profile_end ("gdk_window_add_filter");
         }
 
@@ -1172,6 +1181,7 @@ void
 msd_media_keys_manager_stop (MsdMediaKeysManager *manager)
 {
         MsdMediaKeysManagerPrivate *priv = manager->priv;
+        GdkDisplay *dpy;
         GSList *ls;
         GList *l;
         int i;
@@ -1201,7 +1211,8 @@ msd_media_keys_manager_stop (MsdMediaKeysManager *manager)
         }
 
         need_flush = FALSE;
-        gdk_error_trap_push ();
+        dpy = gdk_display_get_default ();
+        gdk_x11_display_error_trap_push (dpy);
 
         for (i = 0; i < HANDLED_KEYS; ++i) {
                 if (keys[i].key) {
@@ -1215,9 +1226,9 @@ msd_media_keys_manager_stop (MsdMediaKeysManager *manager)
         }
 
         if (need_flush)
-                gdk_flush ();
+                gdk_display_flush (dpy);
 
-        gdk_error_trap_pop_ignored ();
+        gdk_x11_display_error_trap_pop_ignored (dpy);
 
         g_slist_free (priv->screens);
         priv->screens = NULL;
